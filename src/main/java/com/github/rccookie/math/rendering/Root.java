@@ -2,7 +2,7 @@ package com.github.rccookie.math.rendering;
 
 import com.github.rccookie.primitive.int2;
 import com.github.rccookie.util.Arguments;
-import com.github.rccookie.util.Console;
+import com.github.rccookie.xml.Node;
 
 final class Root implements Expression {
 
@@ -78,8 +78,17 @@ final class Root implements Expression {
         return "\\sqrt["+degree.renderLatex()+"]{"+value.renderLatex()+"}";
     }
 
-    public static void main(String[] args) {
-        for(int i=1; i<=10; i++)
-            Console.log(createRootShape(i, '\u2572', '\u2571'));
+    @Override
+    public Node renderMathMLNode() {
+        Node degree = this.degree.renderMathMLNode();
+        Node root;
+        if(degree.text().isEmpty())
+            root = new Node("msqrt");
+        else {
+            root = new Node("mroot");
+            root.children.add(degree);
+        }
+        root.children.add(0, value.renderMathMLNode());
+        return root;
     }
 }

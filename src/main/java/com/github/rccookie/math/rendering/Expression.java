@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 
 import com.github.rccookie.util.Arguments;
 import com.github.rccookie.util.Console;
+import com.github.rccookie.xml.Node;
+import com.github.rccookie.xml.XML;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -23,29 +25,244 @@ public interface Expression {
 
     String renderLatex();
 
-//    Node renderMathMLNode();
-//    default Node renderMathML(boolean inline) {
-//        Node math = new Node("math");
-//        math.attributes.put("displaystyle", inline+"");
-//        math.children.add(renderMathMLNode());
-//        return math;
-//    }
+    Node renderMathMLNode();
 
-
-
-
-    static Expression value(long value) {
-        return new Literal("" + value);
+    default Node renderMathML(boolean inline) {
+        Node math = new Node("math");
+        math.attributes.put("displaystyle", !inline+"");
+        math.attributes.put("display", inline ? "inline" : "block");
+        math.children.add(renderMathMLNode());
+        return math;
     }
 
-    static Expression value(double value, boolean forcePlain) {
-        return new Literal(forcePlain ? new BigDecimal(""+value).toPlainString() : (""+value));
+
+
+
+    static Expression pi() {
+        return SpecialLiteral.PI;
     }
 
-    static Expression value(String literal) {
-        return new Literal(literal);
+    static Expression Pi() {
+        return SpecialLiteral.CAP_PI;
     }
 
+    static Expression inf() {
+        return SpecialLiteral.INFINITY;
+    }
+
+    static Expression sum() {
+        return SpecialLiteral.SUM;
+    }
+
+    static Expression prod() {
+        return SpecialLiteral.PRODUCT;
+    }
+
+    static Expression lim() {
+        return SpecialLiteral.LIMES;
+    }
+
+    static Expression naturals() {
+        return SpecialLiteral.NATURAL_NUMS;
+    }
+
+    static Expression integers() {
+        return SpecialLiteral.INT_NUMS;
+    }
+
+    static Expression rationals() {
+        return SpecialLiteral.RATIONAL_NUMS;
+    }
+
+    static Expression reals() {
+        return SpecialLiteral.REAL_NUMS;
+    }
+
+    static Expression complexes() {
+        return SpecialLiteral.COMPLEX_NUMS;
+    }
+
+    static Expression plus() {
+        return SpecialLiteral.PLUS;
+    }
+
+    static Expression minus() {
+        return SpecialLiteral.MINUS;
+    }
+
+    static Expression mult() {
+        return SpecialLiteral.MULTIPLY;
+    }
+
+    static Expression div() {
+        return SpecialLiteral.DIVIDE;
+    }
+
+    static Expression cross() {
+        return SpecialLiteral.CROSS;
+    }
+
+    static Expression eq() {
+        return SpecialLiteral.EQUALS;
+    }
+
+    static Expression nEquals() {
+        return SpecialLiteral.NOT_EQUALS;
+    }
+
+    static Expression approx() {
+        return SpecialLiteral.APPROXIMATELY;
+    }
+
+    static Expression nApprox() {
+        return SpecialLiteral.NOT_APPROXIMATELY;
+    }
+
+    static Expression less() {
+        return SpecialLiteral.LESS;
+    }
+
+    static Expression nLess() {
+        return SpecialLiteral.NOT_LESS;
+    }
+
+    static Expression greater() {
+        return SpecialLiteral.GREATER;
+    }
+
+    static Expression nGreater() {
+        return SpecialLiteral.NOT_GREATER;
+    }
+
+    static Expression leq() {
+        return SpecialLiteral.LESS_OR_EQUAL;
+    }
+
+    static Expression nLeq() {
+        return SpecialLiteral.NOT_LESS_OR_EQUAL;
+    }
+
+    static Expression geq() {
+        return SpecialLiteral.GREATER_OR_EQUAL;
+    }
+
+    static Expression nGeq() {
+        return SpecialLiteral.NOT_GREATER_OR_EQUAL;
+    }
+
+    static Expression def() {
+        return SpecialLiteral.DEFINE;
+    }
+
+    static Expression defRev() {
+        return SpecialLiteral.DEFINE_REVERSE;
+    }
+
+    static Expression in() {
+        return SpecialLiteral.IN;
+    }
+
+    static Expression nIn() {
+        return SpecialLiteral.NOT_IN;
+    }
+
+    static Expression contains() {
+        return SpecialLiteral.CONTAINS;
+    }
+
+    static Expression nContains() {
+        return SpecialLiteral.CONTAINS_NOT;
+    }
+
+    static Expression and() {
+        return SpecialLiteral.AND;
+    }
+
+    static Expression or() {
+        return SpecialLiteral.OR;
+    }
+
+    static Expression neg() {
+        return SpecialLiteral.NEGATE;
+    }
+
+    static Expression not() {
+        return SpecialLiteral.NOT;
+    }
+
+    static Expression factorial() {
+        return SpecialLiteral.FACTORIAL;
+    }
+
+    static Expression percent() {
+        return SpecialLiteral.PERCENT;
+    }
+
+    static Expression deg() {
+        return SpecialLiteral.DEGREE;
+    }
+
+    static Expression arrow(Boolean right, boolean doubleLine) {
+        if(right == null) return doubleLine ? SpecialLiteral.D_LEFT_RIGHT_ARROW : SpecialLiteral.LEFT_RIGHT_ARROW;
+        if(right) return doubleLine ? SpecialLiteral.D_RIGHT_ARROW : SpecialLiteral.RIGHT_ARROW;
+        return doubleLine ? SpecialLiteral.D_LEFT_ARROW : SpecialLiteral.LEFT_ARROW;
+    }
+
+    // ---------------------------------------------------
+
+    static Expression num(long value) {
+        return new Number("" + value);
+    }
+
+    static Expression num(double value, boolean forcePlain) {
+        return new Number(forcePlain ? new BigDecimal(""+value).toPlainString() : (""+value));
+    }
+
+    static Expression num(String literal) {
+        return new Number(literal);
+    }
+
+    static Expression name(String literal) {
+        return new Literal(false, literal);
+    }
+
+    static Expression name(String inline, String ascii, String unicode, String latex, String mathML) {
+        if(Arguments.checkNull(inline, "inline").contains("\n"))
+            throw new IllegalArgumentException("Inline name may not contain newline characters");
+        return new SpecialLiteral(false, inline, ascii, unicode, latex, mathML);
+    }
+
+    static Expression name(String inline, AsciiArt ascii, String unicode, String latex, String mathML) {
+        return name(inline, ascii, new AsciiArt(unicode), latex, name(mathML).renderMathMLNode());
+    }
+
+    static Expression name(String inline, AsciiArt ascii, AsciiArt unicode, String latex, Node mathML) {
+        if(Arguments.checkNull(inline, "inline").contains("\n"))
+            throw new IllegalArgumentException("Inline name may not contain newline characters");
+        return new SpecialLiteral(inline, ascii, unicode, latex, mathML);
+    }
+
+    static Expression symbol(String literal) {
+        return new Literal(true, literal);
+    }
+
+    static Expression symbol(String inline, String ascii, String unicode, String latex, String mathML) {
+        if(Arguments.checkNull(inline, "inline").contains("\n"))
+            throw new IllegalArgumentException("Inline symbol may not contain newline characters");
+        return new SpecialLiteral(true, inline, ascii, unicode, latex, mathML);
+    }
+
+    static Expression symbol(String inline, AsciiArt ascii, String unicode, String latex, String mathML) {
+        return symbol(inline, ascii, new AsciiArt(unicode), latex, symbol(mathML).renderMathMLNode());
+    }
+
+    static Expression symbol(String inline, AsciiArt ascii, AsciiArt unicode, String latex, Node mathML) {
+        if(Arguments.checkNull(inline, "inline").contains("\n"))
+            throw new IllegalArgumentException("Inline symbol may not contain newline characters");
+        return new SpecialLiteral(inline, ascii, unicode, latex, mathML);
+    }
+
+    // ---------------------------------------------------
 
     static Expression par(Expression inner) {
         return brackets(Bracket.ROUND, inner);
@@ -78,6 +295,8 @@ public interface Expression {
     static Expression right(Bracket type, Expression inner) {
         return new BracketLiteral(type, false, inner);
     }
+
+    // ---------------------------------------------------
 
     static Expression frac(Expression numerator, Expression denominator) {
         return new Fraction(numerator, denominator);
@@ -144,18 +363,20 @@ public interface Expression {
         return bracketType != null ? brackets(bracketType, grid(rows)) : grid(rows);
     }
 
-    static Expression mid(Expression a, Expression b) {
-        if(a instanceof Grid && b instanceof Grid && ((Grid) a).elements.length == ((Grid) b).elements.length)
-            return new AugmentedGrid((Grid) a, (Grid) b);
-        return new Middle(a,b);
-    }
-
     static Expression augMatrix(Expression a, Expression b) {
         return augMatrix(DEFAULT_MATRIX_BRACKET, a, b);
     }
 
     static Expression augMatrix(Bracket bracketType, Expression a, Expression b) {
         return bracketType != null ? brackets(bracketType, mid(a,b)) : mid(a,b);
+    }
+
+    // ---------------------------------------------------
+
+    static Expression mid(Expression a, Expression b) {
+        if(a instanceof Grid && b instanceof Grid && ((Grid) a).elements.length == ((Grid) b).elements.length)
+            return new AugmentedGrid((Grid) a, (Grid) b);
+        return new Middle(a,b);
     }
 
     static Expression set(Expression elementPattern, Expression predicate) {
@@ -167,15 +388,17 @@ public interface Expression {
     }
 
     static Expression list(Expression... values) {
-        return customList(value(","), values);
+        return customList(num(","), values);
     }
 
     static Expression customList(Expression delimiter, Expression... values) {
         return new List(delimiter, values);
     }
 
+    // ---------------------------------------------------
+
     static Expression call(String fName, Expression... params) {
-        return call(value(fName), params);
+        return call(num(fName), params);
     }
 
     static Expression call(Expression f, Expression... params) {
@@ -192,104 +415,106 @@ public interface Expression {
         return new Concatenation(a,b,false);
     }
 
+    // ---------------------------------------------------
+
     static Expression plus(Expression a, Expression b) {
-        return infix("+", a, b);
+        return infix(plus(), a, b);
     }
 
     static Expression minus(Expression a, Expression b) {
-        return infix("-", a, b);
+        return infix(minus(), a, b);
     }
 
     static Expression mult(Expression a, Expression b) {
-        return infix(symbol("\u00B7", "*", "\u00B7", "\\cdot"), a, b);
+        return infix(mult(), a, b);
     }
 
     static Expression div(Expression a, Expression b) {
-        return infix("/", a, b);
+        return infix(div(), a, b);
     }
 
     static Expression cross(Expression a, Expression b) {
-        return infix(symbol("\u2A2F", "x", "\u2A2F", "\\times"), a, b);
+        return infix(cross(), a, b);
     }
 
     static Expression eq(Expression a, Expression b) {
-        return infix("=", a, b);
+        return infix(eq(), a, b);
     }
 
     static Expression nEquals(Expression a, Expression b) {
-        return infix(symbol("!=", "!=", "\u2260", "\\not="), a, b);
+        return infix(nEquals(), a, b);
     }
 
     static Expression approx(Expression a, Expression b) {
-        return infix(symbol("\u2248", "~", "\u2248", "\\approx"), a, b);
+        return infix(approx(), a, b);
     }
 
     static Expression nApprox(Expression a, Expression b) {
-        return infix(symbol("\u2249", "!~", "\u2249", "\\not\\approx"), a, b);
+        return infix(nApprox(), a, b);
     }
 
     static Expression less(Expression a, Expression b) {
-        return infix("<", a, b);
+        return infix(less(), a, b);
     }
 
     static Expression nLess(Expression a, Expression b) {
-        return infix(symbol("\u226E", "!<", "\u226E", "\\not<"), a, b);
+        return infix(nLess(), a, b);
     }
 
     static Expression leq(Expression a, Expression b) {
-        return infix(symbol("<=", "<=", "\u2A7D", "\\leq"), a, b);
+        return infix(leq(), a, b);
     }
 
     static Expression nLeq(Expression a, Expression b) {
-        return infix(symbol("\u2270", "!<=", "\u2270", "\\not\\leq"), a, b);
+        return infix(nLeq(), a, b);
     }
 
     static Expression greater(Expression a, Expression b) {
-        return infix(">", a, b);
+        return infix(greater(), a, b);
     }
 
     static Expression nGreater(Expression a, Expression b) {
-        return infix(symbol("\u226F", "!>", "\u226F", "\\not>"), a, b);
+        return infix(nGreater(), a, b);
     }
 
     static Expression geq(Expression a, Expression b) {
-        return infix(symbol(">=", ">=", "\u2A7E", "\\geq"), a, b);
+        return infix(geq(), a, b);
     }
 
     static Expression nGeq(Expression a, Expression b) {
-        return infix(symbol("\u2271", "!<=", "\u2271", "\\not\\geq"), a, b);
+        return infix(nGeq(), a, b);
     }
 
     static Expression def(Expression a, Expression b) {
-        return infix(" := ", a, b);
+        return infix(def(), a, b);
     }
 
     static Expression defRev(Expression a, Expression b) {
-        return infix(" =: ", a, b);
+        return infix(defRev(), a, b);
     }
 
     static Expression in(Expression a, Expression b) {
-        return infix(symbol(" \u2208 ", new AsciiArt("  __ \n /__ \n \\__ ").setCenter(1), " \u2208 ", "\\in"), a, b);
+        return infix(in(), a, b);
     }
 
     static Expression nIn(Expression a, Expression b) {
-        return infix(symbol(" \u2209 ", new AsciiArt("  __/\n /_/ \n \\/_ \n /").setCenter(1), " \u2209 ", "\\not\\in"), a, b);
+        return infix(nIn(), a, b);
     }
 
     static Expression contains(Expression a, Expression b) {
-        return infix(symbol(" \u220B ", new AsciiArt(" __/\n _/\\ \n /_/\n/").setCenter(1), " \u220B ", "\\ni"), a, b);
+        return infix(contains(), a, b);
     }
 
     static Expression nContains(Expression a, Expression b) {
-        return infix(symbol(" \u220C ", new AsciiArt("  __/\n /_/ \n \\/_ \n /").setCenter(1), " \u220C ", "\\not\\ni"), a, b);
+        return infix(nContains(), a, b);
     }
 
     static Expression and(Expression a, Expression b) {
-        return infix(symbol("\u2227", "&", "\u2227", "\\land"), a, b);
+        return infix(and(), a, b);
     }
 
     static Expression or(Expression a, Expression b) {
-        return infix(symbol("\u2228", " || ", "\u2228", "\\lor"), a, b);
+        return infix(or(), a, b);
     }
 
     static Expression infix(Expression symbol, Expression a, Expression b) {
@@ -299,15 +524,15 @@ public interface Expression {
     static Expression infix(String symbol, Expression a, Expression b) {
         if(Arguments.checkNull(symbol, "symbol").contains("\n"))
             throw new IllegalArgumentException("Symbol may not contain newline characters");
-        return infix(symbol(symbol, symbol, symbol, symbol), a, b);
+        return infix(symbol(symbol), a, b);
     }
 
     static Expression neg(Expression value) {
-        return prefix("-", value);
+        return prefix(neg(), value);
     }
 
     static Expression not(Expression value) {
-        return prefix(symbol("\u00AC", "!", "\u00AC", "\\lnot"), value);
+        return prefix(not(), value);
     }
 
     static Expression prefix(Expression symbol, Expression value) {
@@ -317,19 +542,19 @@ public interface Expression {
     static Expression prefix(String symbol, Expression value) {
         if(Arguments.checkNull(symbol, "symbol").contains("\n"))
             throw new IllegalArgumentException("Symbol may not contain newline characters");
-        return prefix(symbol(symbol, symbol, symbol, symbol), value);
+        return prefix(symbol(symbol), value);
     }
 
     static Expression factorial(Expression value) {
-        return postfix("!", value);
+        return postfix(factorial(), value);
     }
 
     static Expression percent(Expression value) {
-        return new SimplePostfixOperation(symbol("%", "%", "%", "\\%"), value);
+        return new SimplePostfixOperation(percent(), value);
     }
 
     static Expression deg(Expression value) {
-        return new SimplePostfixOperation(symbol("°", "°", "°", "^\\circ"), value);
+        return new SimplePostfixOperation(deg(), value);
     }
 
     static Expression postfix(Expression symbol, Expression value) {
@@ -339,46 +564,10 @@ public interface Expression {
     static Expression postfix(String symbol, Expression value) {
         if(Arguments.checkNull(symbol, "symbol").contains("\n"))
             throw new IllegalArgumentException("Symbol may not contain newline characters");
-        return postfix(symbol(symbol, symbol, symbol, symbol), value);
+        return postfix(symbol(symbol), value);
     }
 
-    static Expression pi() {
-        return SpecialValue.PI;
-    }
-
-    static Expression Pi() {
-        return SpecialValue.CAP_PI;
-    }
-
-    static Expression inf() {
-        return SpecialValue.INFINITY;
-    }
-
-    static Expression arrow(Boolean right, boolean doubleLine) {
-        if(right == null) return doubleLine ? SpecialValue.D_LEFT_RIGHT_ARROW : SpecialValue.LEFT_RIGHT_ARROW;
-        if(right) return doubleLine ? SpecialValue.D_RIGHT_ARROW : SpecialValue.RIGHT_ARROW;
-        return doubleLine ? SpecialValue.D_LEFT_ARROW : SpecialValue.LEFT_ARROW;
-    }
-
-    static Expression symbol(String inline, String ascii, String unicode, String latex) {
-        if(Arguments.checkNull(inline, "inline").contains("\n"))
-            throw new IllegalArgumentException("Inline symbol may not contain newline characters");
-        return new SpecialValue(inline, ascii, unicode, latex);
-    }
-
-    static Expression symbol(String inline, AsciiArt ascii, String unicode, String latex) {
-        return symbol(inline, ascii, new AsciiArt(unicode), latex);
-    }
-
-    static Expression symbol(String inline, String ascii, AsciiArt unicode, String latex) {
-        return symbol(inline, new AsciiArt(ascii), unicode, latex);
-    }
-
-    static Expression symbol(String inline, AsciiArt ascii, AsciiArt unicode, String latex) {
-        if(Arguments.checkNull(inline, "inline").contains("\n"))
-            throw new IllegalArgumentException("Inline symbol may not contain newline characters");
-        return new SpecialValue(inline, ascii, unicode, latex);
-    }
+    // ---------------------------------------------------
 
     static Expression pow(Expression a, Expression b) {
         return sup(a,b);
@@ -397,11 +586,11 @@ public interface Expression {
     }
 
     static Expression sqrt(Expression value) {
-        return root(value(""), value);
+        return root(num(""), value);
     }
 
     static Expression cbrt(Expression value) {
-        return root(value("3"), value);
+        return root(num("3"), value);
     }
 
     static Expression root(Expression degree, Expression value) {
@@ -410,18 +599,6 @@ public interface Expression {
 
     static Expression text(String text) {
         return new Text(text);
-    }
-
-    static Expression sum() {
-        return SpecialValue.SUM;
-    }
-
-    static Expression prod() {
-        return SpecialValue.PRODUCT;
-    }
-
-    static Expression lim() {
-        return SpecialValue.LIMES;
     }
 
     static Expression sum(Expression subscript, Expression value) {
@@ -441,7 +618,7 @@ public interface Expression {
     }
 
     static Expression lim(String var, Expression target, Expression value) {
-        return lim(value(var), target, value);
+        return lim(num(var), target, value);
     }
 
     static Expression lim(Expression var, Expression target, Expression value) {
@@ -453,21 +630,21 @@ public interface Expression {
     }
 
     static Expression integral(@Nullable Expression lowerBound, @Nullable Expression upperBound, Expression value, String indeterminant) {
-        return integral(lowerBound, upperBound, value, value(indeterminant));
+        return integral(lowerBound, upperBound, value, num(indeterminant));
     }
 
     static Expression integral(@Nullable Expression lowerBound, @Nullable Expression upperBound, Expression value, Expression indeterminant) {
-        return new Integral(lowerBound, upperBound, concat(value, concat(value(" d"), indeterminant)));
+        return new Integral(lowerBound, upperBound, concat(value, concat(num(" d"), indeterminant)));
     }
 
 
     static void main(String[] args) {
         Expression[] es = {
-                def(value("A"), matrix(2, 2, not(par(and(value(1), value(0)))), frac(pi(),value(2)), call("exp", value(2), value(3)), neg(factorial(value(4))))),
-                root(value("123456"), augMatrix(grid(3,3,value(1), value(2), value(3), value(4), value(5), value(6), value(7), value(8), value(10)), column(value(10), value(20), value(30)))),
-                set(eq(sum(eq(value("k"), value(0)), inf(), frac(value(1), pow(value("q"), value("k")))), frac(value(1), minus(value(1), value("k")))), nIn(value("q"), par(list(value(0), value(1))))),
-                integral(value(2), value(5), pow(value("x"), value(2)), "x"),
-                eq(lim("x", inf(), frac(value(1), value("x"))), value(0))
+                def(num("A"), matrix(2, 2, not(par(and(num(1), num(0)))), frac(pi(), num(2)), call("exp", num(2), num(3)), neg(factorial(num(4))))),
+                root(num("123456"), augMatrix(grid(3,3, num(1), num(2), num(3), num(4), num(5), num(6), num(7), num(8), num(10)), column(num(10), num(20), num(30)))),
+                set(eq(sum(eq(num("k"), num(0)), inf(), frac(num(1), pow(num("q"), num("k")))), frac(num(1), minus(num(1), num("k")))), nIn(num("q"), par(list(num(0), num(1))))),
+                integral(num(2), num(5), pow(num("x"), num(2)), "x"),
+                eq(lim("x", inf(), frac(num(1), num("x"))), num(0))
         };
         for(Expression e : es) {
             Console.split();
@@ -480,6 +657,8 @@ public interface Expression {
             Console.log(e.renderAscii());
             Console.split("Latex");
             Console.log(e.renderLatex());
+            Console.split("MathML");
+            System.out.println(e.renderMathML(false).toHTML(XML.HTML & ~XML.FORMATTED));
         }
     }
 }

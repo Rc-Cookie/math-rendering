@@ -1,6 +1,7 @@
 package com.github.rccookie.math.rendering;
 
 import com.github.rccookie.util.Arguments;
+import com.github.rccookie.xml.Node;
 
 final class SimplePrefixOperation implements Expression {
 
@@ -40,5 +41,10 @@ final class SimplePrefixOperation implements Expression {
     @Override
     public String renderLatex() {
         return symbol.renderLatex()+"{"+value.renderLatex()+"}";
+    }
+
+    @Override
+    public Node renderMathMLNode() {
+        return Utils.join(symbol.renderMathMLNode(), value.renderMathMLNode());
     }
 }

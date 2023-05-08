@@ -1,6 +1,8 @@
 package com.github.rccookie.math.rendering;
 
 import com.github.rccookie.util.Arguments;
+import com.github.rccookie.xml.Node;
+import com.github.rccookie.xml.Text;
 
 final class BracketLiteral implements Expression {
 
@@ -59,6 +61,14 @@ final class BracketLiteral implements Expression {
         return "\\left." + inner.renderLatex() + "\\right" + RIGHT_LATEX[type.ordinal()];
     }
 
+    @Override
+    public Node renderMathMLNode() {
+        Node o = new Node("mo");
+        o.children.add(new Text((left ? LEFT_SYMBOLS_UNICODE : RIGHT_SYMBOLS_UNICODE)[type.ordinal()]));
+        o.attributes.put("fence", "true");
+        o.attributes.put("stretchy", "true");
+        return Utils.join(o, inner.renderMathMLNode());
+    }
 
     @SuppressWarnings("UnnecessaryUnicodeEscape")
     static AsciiArt renderBracketUnicode(Bracket type, boolean left, int height) {

@@ -2,49 +2,50 @@ package com.github.rccookie.math.rendering;
 
 import com.github.rccookie.util.Arguments;
 import com.github.rccookie.xml.Node;
+import com.github.rccookie.xml.Text;
 
-final class Text implements Expression {
+final class Number implements Expression {
 
-    private final String text;
+    final String value;
 
-    Text(String text) {
-        this.text = Arguments.checkNull(text, "text");
+    Number(String value) {
+        this.value = Arguments.checkNull(value, "value");
     }
 
     @Override
     public String toString() {
-        return "text("+text+")";
+        return value;
     }
 
     @Override
     public String renderInline() {
-        return text.replace('\n', ' ');
+        return value.replace('\n', ' ');
     }
 
     @Override
     public AsciiArt renderAscii() {
-        return new AsciiArt(text);
+        return new AsciiArt(value);
     }
 
     @Override
     public AsciiArt renderUnicode() {
-        return new AsciiArt(text);
+        return new AsciiArt(value);
     }
 
     @Override
     public AsciiArt renderAscii(CharacterSet charset) {
-        return new AsciiArt(text);
+        return new AsciiArt(value);
     }
 
     @Override
     public String renderLatex() {
-        return "\\text{"+ text +"}";
+        return value;
     }
 
     @Override
     public Node renderMathMLNode() {
-        Node s = new Node("ms");
-        s.children.add(new com.github.rccookie.xml.Text(text));
-        return s;
+        Node n = new Node("mn");
+        n.children.add(new Text(value));
+        return n;
     }
 }

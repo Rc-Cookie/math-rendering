@@ -2,6 +2,7 @@ package com.github.rccookie.math.rendering;
 
 import com.github.rccookie.primitive.int2;
 import com.github.rccookie.util.Arguments;
+import com.github.rccookie.xml.Node;
 
 final class Fraction implements Expression {
 
@@ -48,5 +49,13 @@ final class Fraction implements Expression {
     @Override
     public String renderLatex() {
         return "\\frac{"+a.renderLatex()+"}{"+b.renderLatex()+"}";
+    }
+
+    @Override
+    public Node renderMathMLNode() {
+        Node frac = new Node("mfrac");
+        frac.children.add(a.renderMathMLNode());
+        frac.children.add(b.renderMathMLNode());
+        return frac;
     }
 }

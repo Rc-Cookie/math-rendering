@@ -3,6 +3,7 @@ package com.github.rccookie.math.rendering;
 import java.util.function.Function;
 
 import com.github.rccookie.util.Arguments;
+import com.github.rccookie.xml.Node;
 
 final class SuperSubscript implements Expression {
 
@@ -73,5 +74,14 @@ final class SuperSubscript implements Expression {
     @Override
     public String renderLatex() {
         return "{"+main.renderLatex()+"}^{"+sup.renderLatex()+"}_{"+sub.renderLatex()+"}";
+    }
+
+    @Override
+    public Node renderMathMLNode() {
+        Node subSup = new Node("msubSup");
+        subSup.children.add(main.renderMathMLNode());
+        subSup.children.add(sub.renderMathMLNode());
+        subSup.children.add(sup.renderMathMLNode());
+        return subSup;
     }
 }

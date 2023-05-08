@@ -4,6 +4,7 @@ import java.util.function.Function;
 
 import com.github.rccookie.primitive.int2;
 import com.github.rccookie.util.Arguments;
+import com.github.rccookie.xml.Node;
 
 final class AugmentedGrid implements Expression {
 
@@ -98,5 +99,10 @@ final class AugmentedGrid implements Expression {
                 str.append("\\\\");
         }
         return str.append("\\end{matrix}").toString();
+    }
+
+    @Override
+    public Node renderMathMLNode() {
+        return new Middle(a,b).renderMathMLNode();
     }
 }

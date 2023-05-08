@@ -1,6 +1,8 @@
 package com.github.rccookie.math.rendering;
 
 import com.github.rccookie.util.Arguments;
+import com.github.rccookie.xml.Node;
+import com.github.rccookie.xml.Text;
 
 final class Brackets implements Expression {
 
@@ -59,5 +61,17 @@ final class Brackets implements Expression {
     @Override
     public String renderLatex() {
         return "\\left" + BracketLiteral.LEFT_LATEX[type.ordinal()] + inner.renderLatex() + "\\right" + BracketLiteral.RIGHT_LATEX[type.ordinal()];
+    }
+
+    @Override
+    public Node renderMathMLNode() {
+        Node left = new Node("mo"), right = new Node("mo");
+        left.children.add(new Text(BracketLiteral.LEFT_SYMBOLS_UNICODE[type.ordinal()]));
+        right.children.add(new Text(BracketLiteral.RIGHT_SYMBOLS_UNICODE[type.ordinal()]));
+        left.attributes.put("fence", "true");
+        right.attributes.put("fence", "true");
+        left.attributes.put("stretchy", "true");
+        right.attributes.put("stretchy", "true");
+        return Utils.join(left, inner.renderMathMLNode(), right);
     }
 }

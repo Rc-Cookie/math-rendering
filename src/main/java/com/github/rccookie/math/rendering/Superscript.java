@@ -2,6 +2,7 @@ package com.github.rccookie.math.rendering;
 
 import com.github.rccookie.primitive.int2;
 import com.github.rccookie.util.Arguments;
+import com.github.rccookie.xml.Node;
 
 final class Superscript implements Expression {
 
@@ -64,5 +65,13 @@ final class Superscript implements Expression {
     @Override
     public String renderLatex() {
         return "{"+a.renderLatex()+"}^{"+b.renderLatex()+"}";
+    }
+
+    @Override
+    public Node renderMathMLNode() {
+        Node sup = new Node("msup");
+        sup.children.add(a.renderMathMLNode());
+        sup.children.add(b.renderMathMLNode());
+        return sup;
     }
 }

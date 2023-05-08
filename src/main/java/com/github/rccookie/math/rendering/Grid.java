@@ -5,6 +5,7 @@ import java.util.function.Function;
 
 import com.github.rccookie.primitive.int2;
 import com.github.rccookie.util.Arguments;
+import com.github.rccookie.xml.Node;
 
 final class Grid implements Expression {
 
@@ -88,5 +89,20 @@ final class Grid implements Expression {
                 str.append("\\\\");
         }
         return str.append("\\end{matrix}").toString();
+    }
+
+    @Override
+    public Node renderMathMLNode() {
+        Node table = new Node("mtable");
+        for(Expression[] row : elements) {
+            Node tr = new Node("mtr");
+            for(Expression e : row) {
+                Node td = new Node("mtd");
+                td.children.add(e.renderMathMLNode());
+                tr.children.add(td);
+            }
+            table.children.add(tr);
+        }
+        return table;
     }
 }

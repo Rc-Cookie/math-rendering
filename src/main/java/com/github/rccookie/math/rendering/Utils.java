@@ -1,8 +1,13 @@
 package com.github.rccookie.math.rendering;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import com.github.rccookie.xml.Node;
+
+import org.jetbrains.annotations.Nullable;
 
 final class Utils {
 
@@ -119,5 +124,22 @@ final class Utils {
             chars[i] = c;
         }
         return new String(chars);
+    }
+
+
+    public static Node emptyNode() {
+        return new Node("ms");
+    }
+
+    public static Node orEmpty(@Nullable Expression e) {
+        return e != null ? e.renderMathMLNode() : emptyNode();
+    }
+
+    public static Node join(Node... nodes) {
+        if(nodes.length == 0) return emptyNode();
+        if(nodes.length == 1) return nodes[0];
+        Node row = new Node("mrow");
+        row.children.addAll(Arrays.asList(nodes));
+        return row;
     }
 }

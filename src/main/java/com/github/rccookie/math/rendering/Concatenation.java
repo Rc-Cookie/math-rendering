@@ -3,6 +3,7 @@ package com.github.rccookie.math.rendering;
 import java.util.Set;
 
 import com.github.rccookie.util.Arguments;
+import com.github.rccookie.xml.Node;
 
 final class Concatenation implements Expression {
 
@@ -54,6 +55,13 @@ final class Concatenation implements Expression {
         return a.renderLatex() + " " + b.renderLatex(); // Math mode, spaces are ignored
     }
 
+    @Override
+    public Node renderMathMLNode() {
+        if(renderSpace())
+            return Utils.join(a.renderMathMLNode(), new Node("mspace"), b.renderMathMLNode());
+        return Utils.join(a.renderMathMLNode(), b.renderMathMLNode());
+    }
+
     private static final Set<Class<? extends Expression>> NO_SPACE_TYPES = Set.of(
             Brackets.class,
             BracketLiteral.class,
@@ -65,9 +73,9 @@ final class Concatenation implements Expression {
         if(!maybeSpace) return false;
         if(NO_SPACE_TYPES.contains(a.getClass()) || NO_SPACE_TYPES.contains(b.getClass()))
             return false;
-        if(!(a instanceof Literal && b instanceof Literal)) return true;
+        if(!(a instanceof Number && b instanceof Number)) return true;
 
-        String a = ((Literal) this.a).value, b = ((Literal) this.b).value;
+        String a = ((Number) this.a).value, b = ((Number) this.b).value;
         if(a.isEmpty() || b.isEmpty()) return false;
         if(a.contains("\n") || b.contains("\n")) return true;
 

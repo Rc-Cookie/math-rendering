@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.function.Function;
 
 import com.github.rccookie.util.Arguments;
+import com.github.rccookie.xml.Node;
 
 final class List implements Expression {
 
@@ -45,6 +46,22 @@ final class List implements Expression {
         return renderString(Expression::renderLatex);
     }
 
+    @Override
+    public Node renderMathMLNode() {
+        Node list = new Node("mrow");
+        if(elements.length == 0) return list;
+
+        list.children.add(elements[0].renderMathMLNode());
+        if(elements.length == 1) return list;
+
+        Node delimiter = this.delimiter.renderMathMLNode();
+        for(int i=1; i<elements.length; i++) {
+            list.children.add(delimiter.clone());
+            list.children.add(elements[i].renderMathMLNode());
+        }
+        return list;
+    }
+
     private AsciiArt renderAsciiArt(Function<Expression, AsciiArt> renderer) {
         if(this.elements.length == 0) return new AsciiArt("");
 
@@ -60,7 +77,7 @@ final class List implements Expression {
     private String renderString(Function<Expression, String> renderer) {
         if(elements.length == 0) return "";
         StringBuilder str = new StringBuilder(renderer.apply(elements[0]));
-        for(int i=1; i<elements.length; i++)
+        for (int i = 1; i < elements.length; i++)
             str.append(delimiter).append(renderer.apply(elements[i]));
         return str.toString();
     }

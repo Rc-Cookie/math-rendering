@@ -4,6 +4,7 @@ import java.util.function.Function;
 
 import com.github.rccookie.primitive.int2;
 import com.github.rccookie.util.Arguments;
+import com.github.rccookie.xml.Node;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -78,5 +79,14 @@ final class BigSymbol implements Expression {
         if(sub != null) str += "_{"+sub.renderLatex()+"}";
         if(sup != null) str += "^{"+sup.renderLatex()+"}";
         return str+"{"+value.renderLatex()+"}";
+    }
+
+    @Override
+    public Node renderMathMLNode() {
+        Node underOver = new Node("munderover");
+        underOver.children.add(symbol.renderMathMLNode());
+        underOver.children.add(Utils.orEmpty(sub));
+        underOver.children.add(Utils.orEmpty(sup));
+        return Utils.join(underOver, value.renderMathMLNode());
     }
 }

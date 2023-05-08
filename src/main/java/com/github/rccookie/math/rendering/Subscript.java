@@ -2,6 +2,7 @@ package com.github.rccookie.math.rendering;
 
 import com.github.rccookie.primitive.int2;
 import com.github.rccookie.util.Arguments;
+import com.github.rccookie.xml.Node;
 
 final class Subscript implements Expression {
 
@@ -64,5 +65,13 @@ final class Subscript implements Expression {
     @Override
     public String renderLatex() {
         return "{"+a.renderLatex()+"}_{"+b.renderLatex()+"}";
+    }
+
+    @Override
+    public Node renderMathMLNode() {
+        Node sub = new Node("msub");
+        sub.children.add(a.renderMathMLNode());
+        sub.children.add(b.renderMathMLNode());
+        return sub;
     }
 }

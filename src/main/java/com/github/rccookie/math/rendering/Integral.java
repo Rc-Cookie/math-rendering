@@ -4,6 +4,8 @@ import java.util.function.Function;
 
 import com.github.rccookie.primitive.int2;
 import com.github.rccookie.util.Arguments;
+import com.github.rccookie.xml.Node;
+import com.github.rccookie.xml.Text;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -28,7 +30,7 @@ final class Integral implements Expression {
 
     @Override
     public String renderInline() {
-        return new BigSymbol(Expression.value("\u222B"), a, b, value).renderInline();
+        return new BigSymbol(Expression.num("\u222B"), a, b, value).renderInline();
     }
 
     @Override
@@ -72,6 +74,17 @@ final class Integral implements Expression {
 
     @Override
     public String renderLatex() {
-        return new BigSymbol(Expression.value("\u222B"), a, b, value).renderLatex();
+        return new BigSymbol(Expression.num("\u222B"), a, b, value).renderLatex();
+    }
+
+    @Override
+    public Node renderMathMLNode() {
+        Node symbol = new Node("mo");
+        Node underOver = new Node("munderover");
+        symbol.children.add(new Text("\u222B"));
+        underOver.children.add(symbol);
+        underOver.children.add(Utils.orEmpty(a));
+        underOver.children.add(Utils.orEmpty(b));
+        return Utils.join(underOver, value.renderMathMLNode());
     }
 }

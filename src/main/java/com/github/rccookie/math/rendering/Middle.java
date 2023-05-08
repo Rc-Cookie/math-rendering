@@ -1,6 +1,8 @@
 package com.github.rccookie.math.rendering;
 
 import com.github.rccookie.util.Arguments;
+import com.github.rccookie.xml.Node;
+import com.github.rccookie.xml.Text;
 
 final class Middle implements Expression {
 
@@ -46,5 +48,15 @@ final class Middle implements Expression {
     @Override
     public String renderLatex() {
         return "\\left."+a.renderLatex()+"\\;\\middle|\\;"+b.renderLatex()+"\\right.";
+    }
+
+    @Override
+    public Node renderMathMLNode() {
+        Node o = new Node("mo");
+        o.children.add(new Text("|"));
+        o.attributes.put("separator", "true");
+        o.attributes.put("fence", "true");
+        o.attributes.put("stretchy", "true");
+        return Utils.join(a.renderMathMLNode(), o, b.renderMathMLNode());
     }
 }

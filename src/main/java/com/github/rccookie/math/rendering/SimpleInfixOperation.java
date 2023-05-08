@@ -1,6 +1,7 @@
 package com.github.rccookie.math.rendering;
 
 import com.github.rccookie.util.Arguments;
+import com.github.rccookie.xml.Node;
 
 final class SimpleInfixOperation implements Expression {
 
@@ -55,5 +56,10 @@ final class SimpleInfixOperation implements Expression {
     @Override
     public String renderLatex() {
         return a.renderLatex()+" "+symbol.renderLatex()+" "+b.renderLatex();
+    }
+
+    @Override
+    public Node renderMathMLNode() {
+        return Utils.join(a.renderMathMLNode(), symbol.renderMathMLNode(), b.renderMathMLNode());
     }
 }
