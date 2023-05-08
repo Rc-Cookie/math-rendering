@@ -43,6 +43,17 @@ final class Subscript implements Expression {
         return renderArt(a,b, this.a instanceof Subscript || this.a instanceof SuperSubscript, null);
     }
 
+    @Override
+    public AsciiArt renderAscii(CharacterSet charset) {
+        AsciiArt a = this.a.renderAscii(charset), b = this.b.renderAscii(charset);
+        if(b.height() == 1 && !Utils.isSubscript(a.toString())) {
+            String subscript = Utils.toSubscript(b.getLine(0));
+            if(subscript != null && charset.canDisplay(subscript))
+                return a.appendBottom(new AsciiArt(subscript));
+        }
+        return renderArt(a,b, this.a instanceof Subscript || this.a instanceof SuperSubscript, null);
+    }
+
     static AsciiArt renderArt(AsciiArt a, AsciiArt b, boolean aIsSub, int2 aSize) {
         if(aSize == null) aSize = a.size();
         int2 pos = new int2(aSize.x, a.height() - (b.height()+1)/2);

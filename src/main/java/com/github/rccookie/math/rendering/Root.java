@@ -41,6 +41,11 @@ final class Root implements Expression {
         return renderArt(degree.renderUnicode(), value.renderUnicode(), '\u2572', '\u2571', '\u2502');
     }
 
+    @Override
+    public AsciiArt renderAscii(CharacterSet charset) {
+        return renderArt(degree.renderAscii(charset), value.renderAscii(charset), charset.orFallback('\u2572', '\\'), charset.orFallback('\u2571', '/'), charset.orFallback('\u2502', '|'));
+    }
+
     private static AsciiArt renderArt(AsciiArt degree, AsciiArt value, char leftDiag, char rightDiag, char vert) {
         AsciiArt shape = createRootShape(value.height(), leftDiag, rightDiag);
         AsciiArt root = shape.appendTop(value);

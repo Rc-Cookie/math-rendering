@@ -33,6 +33,11 @@ final class SimplePrefixOperation implements Expression {
     }
 
     @Override
+    public AsciiArt renderAscii(CharacterSet charset) {
+        return symbol.renderAscii(charset).appendCenter(value.renderAscii(charset));
+    }
+
+    @Override
     public String renderLatex() {
         return symbol.renderLatex()+"{"+value.renderLatex()+"}";
     }

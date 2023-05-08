@@ -43,6 +43,17 @@ final class Superscript implements Expression {
         return renderArt(a, b, this.a instanceof Superscript || this.a instanceof SuperSubscript, null);
     }
 
+    @Override
+    public AsciiArt renderAscii(CharacterSet charset) {
+        AsciiArt a = this.a.renderAscii(charset), b = this.b.renderAscii(charset);
+        if(b.height() == 1 && !Utils.isSuperscript(a.toString())) {
+            String superscript = Utils.toSuperscript(b.getLine(0));
+            if(superscript != null && charset.canDisplay(superscript))
+                return a.appendTop(new AsciiArt(superscript));
+        }
+        return renderArt(a, b, this.a instanceof Superscript || this.a instanceof SuperSubscript, null);
+    }
+
     static AsciiArt renderArt(AsciiArt a, AsciiArt b, boolean aIsSup, int2 aSize) {
         if(aSize == null) aSize = a.size();
         int2 pos = new int2(aSize.x, -b.height()/2);

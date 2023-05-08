@@ -43,6 +43,20 @@ final class Brackets implements Expression {
     }
 
     @Override
+    public AsciiArt renderAscii(CharacterSet charset) {
+        AsciiArt inner = this.inner.renderAscii(charset);
+        AsciiArt left = BracketLiteral.renderBracketUnicode(type, true, inner.height());
+        AsciiArt right;
+        if(!charset.canDisplay(left.toString())) {
+            left = BracketLiteral.renderBracketAscii(type, true, inner.height());
+            right = BracketLiteral.renderBracketAscii(type, false, inner.height());
+        }
+        else if(!charset.canDisplay((right = BracketLiteral.renderBracketUnicode(type, false, inner.height())).toString()))
+            right = BracketLiteral.renderBracketAscii(type, false, inner.height());
+        return left.appendBottom(inner).appendBottom(right);
+    }
+
+    @Override
     public String renderLatex() {
         return "\\left" + BracketLiteral.LEFT_LATEX[type.ordinal()] + inner.renderLatex() + "\\right" + BracketLiteral.RIGHT_LATEX[type.ordinal()];
     }

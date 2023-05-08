@@ -31,6 +31,11 @@ final class Text implements Expression {
     }
 
     @Override
+    public AsciiArt renderAscii(CharacterSet charset) {
+        return new AsciiArt(text);
+    }
+
+    @Override
     public String renderLatex() {
         return "\\text{"+ text +"}";
     }

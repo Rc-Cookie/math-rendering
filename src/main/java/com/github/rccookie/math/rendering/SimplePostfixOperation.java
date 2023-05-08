@@ -33,6 +33,11 @@ final class SimplePostfixOperation implements Expression {
     }
 
     @Override
+    public AsciiArt renderAscii(CharacterSet charset) {
+        return value.renderAscii(charset).appendCenter(symbol.renderAscii(charset));
+    }
+
+    @Override
     public String renderLatex() {
         return value.renderLatex() + symbol.renderLatex();
     }

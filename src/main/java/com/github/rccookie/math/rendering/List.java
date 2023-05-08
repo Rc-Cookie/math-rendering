@@ -7,10 +7,10 @@ import com.github.rccookie.util.Arguments;
 
 final class List implements Expression {
 
-    final String delimiter;
+    final Expression delimiter;
     final Expression[] elements;
 
-    List(String delimiter, Expression[] elements) {
+    List(Expression delimiter, Expression[] elements) {
         this.delimiter = Arguments.checkNull(delimiter, "delimiter");
         this.elements = Arguments.deepCheckNull(elements, "elements");
     }
@@ -36,6 +36,11 @@ final class List implements Expression {
     }
 
     @Override
+    public AsciiArt renderAscii(CharacterSet charset) {
+        return renderAsciiArt(e -> e.renderAscii(charset));
+    }
+
+    @Override
     public String renderLatex() {
         return renderString(Expression::renderLatex);
     }
@@ -44,14 +49,9 @@ final class List implements Expression {
         if(this.elements.length == 0) return new AsciiArt("");
 
         AsciiArt[] elements = Arrays.stream(this.elements).map(renderer).toArray(AsciiArt[]::new);
-        AsciiArt delimiter = new AsciiArt(this.delimiter);
-
-//        int h = elements[0].height();
-//        for(int i=1; i<elements.length; i++)
-//            h = Math.max(h, elements[i].height());
+        AsciiArt delimiter = renderer.apply(this.delimiter);
 
         AsciiArt art = elements[0];
-//        AsciiArt art = AsciiArt.empty(new int2(0,h)).appendCenter(elements[0], false);
         for(int i=1; i<elements.length; i++)
             art = art.appendCenter(delimiter).appendCenter(elements[i]);
         return art;

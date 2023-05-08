@@ -31,6 +31,11 @@ final class Middle implements Expression {
         return renderArt(a.renderUnicode(), b.renderUnicode(), "\u2502");
     }
 
+    @Override
+    public AsciiArt renderAscii(CharacterSet charset) {
+        return renderArt(a.renderAscii(charset), b.renderAscii(charset), charset.orFallback("|", "\u2502"));
+    }
+
     private static AsciiArt renderArt(AsciiArt a, AsciiArt b, String bar) {
         int height = Math.max(a.center(), b.center()), depth = Math.max(a.height()-a.center(), b.height()-b.center());
         int totalHeight = height + depth;

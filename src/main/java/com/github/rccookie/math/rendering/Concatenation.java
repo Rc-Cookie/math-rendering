@@ -41,6 +41,13 @@ final class Concatenation implements Expression {
     }
 
     @Override
+    public AsciiArt renderAscii(CharacterSet charset) {
+        if(renderSpace())
+            return a.renderAscii(charset).appendTop(new AsciiArt(" ")).appendCenter(b.renderAscii(charset));
+        return a.renderAscii(charset).appendCenter(b.renderAscii(charset));
+    }
+
+    @Override
     public String renderLatex() {
         if(renderSpace())
             return a.renderLatex() + " \\; " + b.renderLatex();

@@ -53,6 +53,11 @@ final class Grid implements Expression {
         return renderGrid(Expression::renderUnicode);
     }
 
+    @Override
+    public AsciiArt renderAscii(CharacterSet charset) {
+        return renderGrid(e -> e.renderAscii(charset));
+    }
+
     private AsciiArt renderGrid(Function<Expression, AsciiArt> elementRenderer) {
         AsciiArt[][] elements = new AsciiArt[this.elements.length][this.elements[0].length];
         int[] widths = new int[elements[0].length], heights = new int[elements.length];

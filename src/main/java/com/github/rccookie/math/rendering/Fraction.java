@@ -33,6 +33,11 @@ final class Fraction implements Expression {
         return renderFraction(a.renderUnicode(), b.renderUnicode());
     }
 
+    @Override
+    public AsciiArt renderAscii(CharacterSet charset) {
+        return renderFraction(a.renderAscii(charset), b.renderAscii(charset));
+    }
+
     private static AsciiArt renderFraction(AsciiArt a, AsciiArt b) {
         AsciiArt bar = new AsciiArt("-".repeat(Math.max(a.width(), b.width()) + (a.height() + b.height() > 2 ? 2 : 0)));
         int aPos = (bar.width() - a.width() + 1) / 2;

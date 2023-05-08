@@ -43,6 +43,18 @@ final class SuperSubscript implements Expression {
         return renderArt(Expression::renderUnicode);
     }
 
+    @Override
+    public AsciiArt renderAscii(CharacterSet charset) {
+        AsciiArt main = this.main.renderAscii(charset), sup = this.sup.renderAscii(charset), sub = this.sub.renderAscii(charset);
+
+        if(sub.height() == 1 && !Utils.isSubscript(sub.toString())) {
+            String subscript = Utils.toSubscript(sub.toString());
+            if(subscript != null && charset.canDisplay(subscript))
+                return Superscript.renderArt(main.appendBottom(new AsciiArt(subscript)), sup, this.main instanceof Superscript || this.main instanceof SuperSubscript, main.size());
+        }
+        return renderArt(e -> e.renderAscii(charset));
+    }
+
     private AsciiArt renderArt(Function<Expression, AsciiArt> renderer) {
         AsciiArt main = renderer.apply(this.main);
         return Subscript.renderArt(

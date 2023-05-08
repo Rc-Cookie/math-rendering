@@ -31,6 +31,11 @@ final class Literal implements Expression {
     }
 
     @Override
+    public AsciiArt renderAscii(CharacterSet charset) {
+        return new AsciiArt(value);
+    }
+
+    @Override
     public String renderLatex() {
         return value;
     }

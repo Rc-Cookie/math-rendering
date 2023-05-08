@@ -44,6 +44,15 @@ final class BracketLiteral implements Expression {
     }
 
     @Override
+    public AsciiArt renderAscii(CharacterSet charset) {
+        AsciiArt inner = this.inner.renderAscii(charset);
+        AsciiArt bracket = renderBracketUnicode(type, left, inner.height());
+        if(!charset.canDisplay(inner.toString()))
+            bracket = renderBracketAscii(type, left, inner.height());
+        return bracket.appendTop(inner);
+    }
+
+    @Override
     public String renderLatex() {
         if(left)
             return "\\left" + LEFT_LATEX[type.ordinal()] + inner.renderLatex() + "\\right.";

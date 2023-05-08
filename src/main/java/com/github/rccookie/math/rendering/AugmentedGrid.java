@@ -47,6 +47,11 @@ final class AugmentedGrid implements Expression {
         return renderGrid(Expression::renderUnicode, '\u2502');
     }
 
+    @Override
+    public AsciiArt renderAscii(CharacterSet charset) {
+        return renderGrid(e -> e.renderAscii(charset), charset.orFallback('\u2502', '|'));
+    }
+
     private AsciiArt renderGrid(Function<Expression, AsciiArt> elementRenderer, char vert) {
         AsciiArt[][] elements = new AsciiArt[a.elements.length][a.elements[0].length + b.elements[0].length];
         for(int i=0; i<elements.length; i++) {

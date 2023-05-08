@@ -52,6 +52,11 @@ final class BigSymbol implements Expression {
         return renderArt(Expression::renderUnicode);
     }
 
+    @Override
+    public AsciiArt renderAscii(CharacterSet charset) {
+        return renderArt(e -> e.renderAscii(charset));
+    }
+
     private AsciiArt renderArt(Function<Expression, AsciiArt> renderer) {
         AsciiArt symbol = renderer.apply(this.symbol);
         AsciiArt art = symbol;

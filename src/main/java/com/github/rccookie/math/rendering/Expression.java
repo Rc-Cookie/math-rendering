@@ -19,6 +19,8 @@ public interface Expression {
 
     AsciiArt renderUnicode();
 
+    AsciiArt renderAscii(CharacterSet charset);
+
     String renderLatex();
 
 //    Node renderMathMLNode();
@@ -165,10 +167,10 @@ public interface Expression {
     }
 
     static Expression list(Expression... values) {
-        return list(",", values);
+        return customList(value(","), values);
     }
 
-    static Expression list(String delimiter, Expression... values) {
+    static Expression customList(Expression delimiter, Expression... values) {
         return new List(delimiter, values);
     }
 

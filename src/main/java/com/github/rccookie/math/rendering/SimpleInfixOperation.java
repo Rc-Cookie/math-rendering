@@ -34,6 +34,11 @@ final class SimpleInfixOperation implements Expression {
         return renderArt(a.renderUnicode(), b.renderUnicode(), symbol.renderUnicode());
     }
 
+    @Override
+    public AsciiArt renderAscii(CharacterSet charset) {
+        return renderArt(a.renderAscii(charset), b.renderAscii(charset), symbol.renderAscii(charset));
+    }
+
     private static AsciiArt renderArt(AsciiArt a, AsciiArt b, AsciiArt symbol) {
         boolean spaces = (a.height() > 2 || b.height() > 2) && (symbol.height() != 1 || !hasPadding(symbol.toString()));
         AsciiArt art = a;

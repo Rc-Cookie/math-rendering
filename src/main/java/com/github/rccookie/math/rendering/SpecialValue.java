@@ -62,6 +62,11 @@ final class SpecialValue implements Expression {
     }
 
     @Override
+    public AsciiArt renderAscii(CharacterSet charset) {
+        return charset.orFallback(unicode, ascii);
+    }
+
+    @Override
     public String renderLatex() {
         return latex;
     }

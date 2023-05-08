@@ -41,6 +41,13 @@ final class Integral implements Expression {
         return renderArt(Expression::renderUnicode, 1, "\u222B", "\u2320", "\u23AE", "\u2321");
     }
 
+    @Override
+    public AsciiArt renderAscii(CharacterSet charset) {
+        if(charset.canDisplay("\u222B\u2320\u23AE\u2321"))
+            return renderArt(e -> e.renderAscii(charset), 1, "\u222B", "\u2320", "\u23AE", "\u2321");
+        return renderArt(e -> e.renderAscii(charset), 3, null, "/", "|", "/");
+    }
+
     private AsciiArt renderArt(Function<Expression, AsciiArt> renderer, int minHeight, String inline, String top, String middle, String bottom) {
         AsciiArt value = renderer.apply(this.value);
         AsciiArt symbol = createSymbol(value.height(), minHeight, inline, top, middle, bottom);
