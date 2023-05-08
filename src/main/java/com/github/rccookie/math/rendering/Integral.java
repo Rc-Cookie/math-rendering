@@ -50,13 +50,11 @@ final class Integral implements Expression {
             AsciiArt a = renderer.apply(this.a);
             art = art.draw(a, new int2(-(a.width()-1) / 2, art.height()));
         }
-        int yOff = 0;
         if(this.b != null) {
             AsciiArt b = renderer.apply(this.b);
-            yOff = b.height();
             art = art.draw(b, new int2(-b.width()/2, -b.height()));
         }
-        return art.draw(value, new int2(art.width(), yOff + (symbol.height() - value.height() + 1) / 2));
+        return art.appendCenter(value);
     }
 
     private static AsciiArt createSymbol(int height, int minHeight, String inline, String top, String middle, String bottom) {

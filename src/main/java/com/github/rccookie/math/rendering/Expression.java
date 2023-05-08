@@ -21,6 +21,14 @@ public interface Expression {
 
     String renderLatex();
 
+//    Node renderMathMLNode();
+//    default Node renderMathML(boolean inline) {
+//        Node math = new Node("math");
+//        math.attributes.put("displaystyle", inline+"");
+//        math.children.add(renderMathMLNode());
+//        return math;
+//    }
+
 
 
 
@@ -259,19 +267,19 @@ public interface Expression {
     }
 
     static Expression in(Expression a, Expression b) {
-        return infix(symbol(" \u2208 ", "  __ \n /__ \n \\__ ", " \u2208 ", "\\in"), a, b);
+        return infix(symbol(" \u2208 ", new AsciiArt("  __ \n /__ \n \\__ ").setCenter(1), " \u2208 ", "\\in"), a, b);
     }
 
     static Expression nIn(Expression a, Expression b) {
-        return infix(symbol(" \u2209 ", "  __/\n /_/ \n \\/_ \n /", " \u2209 ", "\\not\\in"), a, b);
+        return infix(symbol(" \u2209 ", new AsciiArt("  __/\n /_/ \n \\/_ \n /").setCenter(1), " \u2209 ", "\\not\\in"), a, b);
     }
 
     static Expression contains(Expression a, Expression b) {
-        return infix(symbol(" \u220B ", " __/\n _/\\ \n /_/\n/", " \u220B ", "\\ni"), a, b);
+        return infix(symbol(" \u220B ", new AsciiArt(" __/\n _/\\ \n /_/\n/").setCenter(1), " \u220B ", "\\ni"), a, b);
     }
 
     static Expression nContains(Expression a, Expression b) {
-        return infix(symbol(" \u220C ", "  __/\n /_/ \n \\/_ \n /", " \u220C ", "\\not\\ni"), a, b);
+        return infix(symbol(" \u220C ", new AsciiArt("  __/\n /_/ \n \\/_ \n /").setCenter(1), " \u220C ", "\\not\\ni"), a, b);
     }
 
     static Expression and(Expression a, Expression b) {
@@ -351,6 +359,20 @@ public interface Expression {
     }
 
     static Expression symbol(String inline, String ascii, String unicode, String latex) {
+        if(Arguments.checkNull(inline, "inline").contains("\n"))
+            throw new IllegalArgumentException("Inline symbol may not contain newline characters");
+        return new SpecialValue(inline, ascii, unicode, latex);
+    }
+
+    static Expression symbol(String inline, AsciiArt ascii, String unicode, String latex) {
+        return symbol(inline, ascii, new AsciiArt(unicode), latex);
+    }
+
+    static Expression symbol(String inline, String ascii, AsciiArt unicode, String latex) {
+        return symbol(inline, new AsciiArt(ascii), unicode, latex);
+    }
+
+    static Expression symbol(String inline, AsciiArt ascii, AsciiArt unicode, String latex) {
         if(Arguments.checkNull(inline, "inline").contains("\n"))
             throw new IllegalArgumentException("Inline symbol may not contain newline characters");
         return new SpecialValue(inline, ascii, unicode, latex);
@@ -438,19 +460,24 @@ public interface Expression {
 
 
     static void main(String[] args) {
-//        Expression e = def(value("A"), matrix(2, 2, not(par(and(value(1), value(0)))), frac(pi(),value(2)), call("exp", value(2), value(3)), neg(factorial(value(4)))));
-//        Expression e = root(value("123456"), augMatrix(grid(3,3,value(1), value(2), value(3), value(4), value(5), value(6), value(7), value(8), value(10)), column(value(10), value(20), value(30))));
-//        Expression e = set(eq(sum(eq(value("k"), value(0)), inf(), frac(value(1), pow(value("q"), value("k")))), frac(value(1), minus(value(1), value("k")))), nIn(value("q"), par(list(value(0), value(1)))));
-//        Expression e = integral(value(2), value(5), pow(value("x"), value(2)), "x");
-        Expression e = eq(lim("x", inf(), frac(value(1), value("x"))), value(0));
-        Console.log(e);
-        Console.split("Inline");
-        Console.log(e.renderInline());
-        Console.split("Unicode");
-        Console.log(e.renderUnicode());
-        Console.split("Ascii");
-        Console.log(e.renderAscii());
-        Console.split("Latex");
-        Console.log(e.renderLatex());
+        Expression[] es = {
+                def(value("A"), matrix(2, 2, not(par(and(value(1), value(0)))), frac(pi(),value(2)), call("exp", value(2), value(3)), neg(factorial(value(4))))),
+                root(value("123456"), augMatrix(grid(3,3,value(1), value(2), value(3), value(4), value(5), value(6), value(7), value(8), value(10)), column(value(10), value(20), value(30)))),
+                set(eq(sum(eq(value("k"), value(0)), inf(), frac(value(1), pow(value("q"), value("k")))), frac(value(1), minus(value(1), value("k")))), nIn(value("q"), par(list(value(0), value(1))))),
+                integral(value(2), value(5), pow(value("x"), value(2)), "x"),
+                eq(lim("x", inf(), frac(value(1), value("x"))), value(0))
+        };
+        for(Expression e : es) {
+            Console.split();
+            Console.log(e);
+            Console.split("Inline");
+            Console.log(e.renderInline());
+            Console.split("Unicode");
+            Console.log(e.renderUnicode());
+            Console.split("Ascii");
+            Console.log(e.renderAscii());
+            Console.split("Latex");
+            Console.log(e.renderLatex());
+        }
     }
 }

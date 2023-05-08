@@ -24,12 +24,12 @@ final class SimplePostfixOperation implements Expression {
 
     @Override
     public AsciiArt renderAscii() {
-        return value.renderAscii().appendCenter(symbol.renderAscii(), false);
+        return value.renderAscii().appendCenter(symbol.renderAscii());
     }
 
     @Override
     public AsciiArt renderUnicode() {
-        return value.renderUnicode().appendCenter(symbol.renderUnicode(), false);
+        return value.renderUnicode().appendCenter(symbol.renderUnicode());
     }
 
     @Override

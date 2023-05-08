@@ -23,6 +23,10 @@ final class BigSymbol implements Expression {
         this.value = Arguments.checkNull(value, "value");
     }
 
+    @Override
+    public String toString() {
+        return "iter("+symbol+", "+sup+", "+sub+", "+value+")";
+    }
 
     @Override
     public String renderInline() {
@@ -53,16 +57,14 @@ final class BigSymbol implements Expression {
         AsciiArt art = symbol;
         if(this.sub != null) {
             AsciiArt sub = renderer.apply(this.sub);
-            art = art.draw(sub, new int2((symbol.width() - sub.width() + 1) / 2, art.height()));
+            art = art.draw(sub, new int2((symbol.width() - sub.width()) / 2, art.height()));
         }
-        int yOff = 0;
         if(this.sup != null) {
             AsciiArt sup = renderer.apply(this.sup);
-            yOff = sup.height();
             art = art.draw(sup, new int2((symbol.width() - sup.width() + 1) / 2, -sup.height()));
         }
         AsciiArt value = renderer.apply(this.value);
-        return art.draw(value, new int2(art.width(), yOff + (symbol.height() - value.height() + 1) / 2));
+        return art.appendTop(new AsciiArt(" ")).appendCenter(value);
     }
 
     @Override

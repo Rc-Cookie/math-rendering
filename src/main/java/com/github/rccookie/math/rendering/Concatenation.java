@@ -29,15 +29,15 @@ final class Concatenation implements Expression {
     @Override
     public AsciiArt renderAscii() {
         if(renderSpace())
-            return a.renderAscii().appendTop(new AsciiArt(" ")).appendCenter(b.renderAscii(), false);
-        return a.renderAscii().appendCenter(b.renderAscii(), false);
+            return a.renderAscii().appendTop(new AsciiArt(" ")).appendCenter(b.renderAscii());
+        return a.renderAscii().appendCenter(b.renderAscii());
     }
 
     @Override
     public AsciiArt renderUnicode() {
         if(renderSpace())
-            return a.renderUnicode().appendTop(new AsciiArt(" ")).appendCenter(b.renderUnicode(), false);
-        return a.renderUnicode().appendCenter(b.renderUnicode(), false);
+            return a.renderUnicode().appendTop(new AsciiArt(" ")).appendCenter(b.renderUnicode());
+        return a.renderUnicode().appendCenter(b.renderUnicode());
     }
 
     @Override

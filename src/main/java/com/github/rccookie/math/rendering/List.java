@@ -3,7 +3,6 @@ package com.github.rccookie.math.rendering;
 import java.util.Arrays;
 import java.util.function.Function;
 
-import com.github.rccookie.primitive.int2;
 import com.github.rccookie.util.Arguments;
 
 final class List implements Expression {
@@ -47,13 +46,14 @@ final class List implements Expression {
         AsciiArt[] elements = Arrays.stream(this.elements).map(renderer).toArray(AsciiArt[]::new);
         AsciiArt delimiter = new AsciiArt(this.delimiter);
 
-        int h = elements[0].height();
-        for(int i=1; i<elements.length; i++)
-            h = Math.max(h, elements[i].height());
+//        int h = elements[0].height();
+//        for(int i=1; i<elements.length; i++)
+//            h = Math.max(h, elements[i].height());
 
-        AsciiArt art = AsciiArt.empty(new int2(0,h)).appendCenter(elements[0], false);
+        AsciiArt art = elements[0];
+//        AsciiArt art = AsciiArt.empty(new int2(0,h)).appendCenter(elements[0], false);
         for(int i=1; i<elements.length; i++)
-            art = art.appendCenter(delimiter, false).appendCenter(elements[i], false);
+            art = art.appendCenter(delimiter).appendCenter(elements[i]);
         return art;
     }
 

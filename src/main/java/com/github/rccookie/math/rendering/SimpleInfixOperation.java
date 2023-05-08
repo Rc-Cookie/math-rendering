@@ -38,9 +38,9 @@ final class SimpleInfixOperation implements Expression {
         boolean spaces = (a.height() > 2 || b.height() > 2) && (symbol.height() != 1 || !hasPadding(symbol.toString()));
         AsciiArt art = a;
         if(spaces) art = art.appendTop(new AsciiArt(" "));
-        art = art.appendCenter(symbol, false);
+        art = art.appendCenter(symbol);
         if(spaces) art = art.appendTop(new AsciiArt(" "));
-        return art.appendCenter(b, false);
+        return art.appendCenter(b);
     }
 
     private static boolean hasPadding(String s) {

@@ -68,7 +68,7 @@ final class Grid implements Expression {
                 art = art.draw(elements[i][j], new int2(xOff + (widths[j]-elements[i][j].width()+1)/2, yOff + (heights[i]-elements[i][j].height()+1)/2));
             }
         }
-        return art;
+        return art.recalculateCenter();
     }
 
     @Override

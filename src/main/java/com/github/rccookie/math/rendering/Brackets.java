@@ -30,16 +30,16 @@ final class Brackets implements Expression {
     public AsciiArt renderAscii() {
         AsciiArt inner = this.inner.renderAscii();
         return BracketLiteral.renderBracketAscii(type, true, inner.height())
-                .appendCenter(inner, false)
-                .appendCenter(BracketLiteral.renderBracketAscii(type, false, inner.height()), false);
+                .appendBottom(inner)
+                .appendBottom(BracketLiteral.renderBracketAscii(type, false, inner.height()));
     }
 
     @Override
     public AsciiArt renderUnicode() {
         AsciiArt inner = this.inner.renderUnicode();
         return BracketLiteral.renderBracketUnicode(type, true, inner.height())
-                .appendCenter(inner, false)
-                .appendCenter(BracketLiteral.renderBracketUnicode(type, false, inner.height()), false);
+                .appendBottom(inner)
+                .appendBottom(BracketLiteral.renderBracketUnicode(type, false, inner.height()));
     }
 
     @Override

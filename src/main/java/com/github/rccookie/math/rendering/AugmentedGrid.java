@@ -77,7 +77,7 @@ final class AugmentedGrid implements Expression {
             }
         }
 
-        return art;
+        return art.recalculateCenter();
     }
 
     @Override

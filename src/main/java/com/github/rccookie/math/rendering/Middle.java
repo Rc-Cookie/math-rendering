@@ -32,8 +32,10 @@ final class Middle implements Expression {
     }
 
     private static AsciiArt renderArt(AsciiArt a, AsciiArt b, String bar) {
-        int height = Math.max(a.height(), b.height());
-        return a.appendCenter(new AsciiArt(height, i -> i==height-1 ? " | " : " "+bar+" "), true).appendCenter(b, false);
+        int height = Math.max(a.center(), b.center()), depth = Math.max(a.height()-a.center(), b.height()-b.center());
+        int totalHeight = height + depth;
+        AsciiArt barArt = new AsciiArt(totalHeight, i -> i==totalHeight-1 ? " | " : " "+bar+" ").setCenter(height);
+        return a.appendCenter(barArt).appendCenter(b);
     }
 
     @Override

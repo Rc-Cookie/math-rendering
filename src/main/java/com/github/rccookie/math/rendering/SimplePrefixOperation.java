@@ -24,12 +24,12 @@ final class SimplePrefixOperation implements Expression {
 
     @Override
     public AsciiArt renderAscii() {
-        return symbol.renderAscii().appendCenter(value.renderAscii(), true);
+        return symbol.renderAscii().appendCenter(value.renderAscii());
     }
 
     @Override
     public AsciiArt renderUnicode() {
-        return symbol.renderUnicode().appendCenter(value.renderUnicode(), true);
+        return symbol.renderUnicode().appendCenter(value.renderUnicode());
     }
 
     @Override

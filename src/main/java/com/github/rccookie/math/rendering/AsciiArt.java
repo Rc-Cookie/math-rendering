@@ -14,14 +14,17 @@ import static com.github.rccookie.math.rendering.Utils.blank;
 public final class AsciiArt {
 
     private final String[] lines;
+    private final int center;
 
     public AsciiArt(String value) {
         lines = value.lines().toArray(String[]::new);
+        center = lines.length / 2;
         pad();
     }
 
     public AsciiArt(int height, IntFunction<String> lineGenerator) {
         lines = new String[height];
+        center = height / 2;
         for(int i=0; i<lines.length; i++)
             lines[i] = Arguments.checkNull(lineGenerator.apply(i), "lineGenerator.apply("+i+")");
         pad();
@@ -29,11 +32,13 @@ public final class AsciiArt {
 
     public AsciiArt(String[] lines) {
         this.lines = Arguments.checkNull(lines, "lines").clone();
+        center = lines.length / 2;
         pad();
     }
 
-    private AsciiArt(boolean ignored, String[] lines) {
+    private AsciiArt(String[] lines, int center) {
         this.lines = lines;
+        this.center = center;
     }
 
     private void pad() {
@@ -58,6 +63,10 @@ public final class AsciiArt {
         return lines.length;
     }
 
+    public int center() {
+        return center;
+    }
+
     public String getLine(int index) {
         return lines[index];
     }
@@ -67,50 +76,56 @@ public final class AsciiArt {
         return String.join("\n", lines);
     }
 
+    public AsciiArt setCenter(int center) {
+        return new AsciiArt(lines, Arguments.checkRange(center, 0, lines.length));
+    }
+
+    public AsciiArt recalculateCenter() {
+        return setCenter(lines.length / 2);
+    }
+
     @Contract(pure = true)
     public AsciiArt appendTop(AsciiArt a) {
+        return appendTop(a, true);
+    }
+
+    @Contract(pure = true)
+    public AsciiArt appendTop(AsciiArt a, boolean keepCenter) {
         String[] lines = new String[Math.max(this.lines.length, a.lines.length)];
         for(int i=0; i<lines.length; i++) {
             String line = i < this.lines.length ? this.lines[i] : blank(width());
             lines[i] = line + (i < a.lines.length ? a.lines[i] : blank(a.width()));
         }
-        return new AsciiArt(true, lines);
+        return new AsciiArt(lines, keepCenter ? center : a.center);
     }
 
     @Contract(pure = true)
     public AsciiArt appendBottom(AsciiArt a) {
+        return appendBottom(a, true);
+    }
+
+    @Contract(pure = true)
+    public AsciiArt appendBottom(AsciiArt a, boolean keepCenter) {
         String[] lines = new String[Math.max(this.lines.length, a.lines.length)];
         for(int i=0; i<lines.length; i++) {
             String line = i < this.lines.length ? this.lines[this.lines.length - i - 1] : blank(width());
             lines[lines.length - i - 1] = line + (i < a.lines.length ? a.lines[a.lines.length - i - 1] : blank(a.width()));
         }
-        return new AsciiArt(true, lines);
+        return new AsciiArt(lines, keepCenter ? Math.max(0, a.lines.length-lines.length) + center : Math.max(0, lines.length-a.lines.length) + a.center);
     }
 
     @Contract(pure = true)
-    public AsciiArt appendCenter(AsciiArt a, boolean roundUp) {
-        String[] lines = new String[Math.max(this.lines.length, a.lines.length)];
-        if(this.lines.length > a.lines.length) {
-            int off = (this.lines.length - a.lines.length + (roundUp ? 0 : 1)) / 2;
-            for(int i=0; i<lines.length; i++) {
-                if(i < off || i >= off + a.lines.length)
-                    lines[i] = this.lines[i] + blank(a.width());
-                else lines[i] = this.lines[i] + a.lines[i-off];
-            }
-        }
-        else {
-            int off = (a.lines.length - this.lines.length + (roundUp ? 0 : 1)) / 2;
-            for(int i=0; i<lines.length; i++) {
-                if(i < off || i >= off + this.lines.length)
-                    lines[i] = blank(width()) + a.lines[i];
-                else lines[i] = this.lines[i-off] + a.lines[i];
-            }
-        }
-        return new AsciiArt(true, lines);
+    public AsciiArt appendCenter(AsciiArt a) {
+        return draw(a, new int2(width(), center - a.center));
     }
 
     @Contract(pure = true)
     public AsciiArt draw(AsciiArt a, int2 position) {
+        return draw(a, position, true);
+    }
+
+    @Contract(pure = true)
+    public AsciiArt draw(AsciiArt a, int2 position, boolean keepCenter) {
         int2 min = int2.min(int2.zero, position);
         IRect selfArea = new IRect(min.negated(), min.negated().add(size()));
         IRect aArea = new IRect(position.subed(min), position.subed(min).add(a.size()));
@@ -147,13 +162,13 @@ public final class AsciiArt {
             else lines[i] = blank(w);
         }
 
-        return new AsciiArt(true, lines);
+        return new AsciiArt(lines, keepCenter ? Math.max(0, -position.y) + center : Math.max(0, position.y) + a.center);
     }
 
     public static AsciiArt empty(int2 size) {
         String line = blank(size.x);
         String[] lines = new String[size.y];
         Arrays.fill(lines, line);
-        return new AsciiArt(true, lines);
+        return new AsciiArt(lines, size.y / 2);
     }
 }

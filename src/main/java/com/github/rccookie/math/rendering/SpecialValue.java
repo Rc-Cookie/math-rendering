@@ -26,11 +26,15 @@ final class SpecialValue implements Expression {
     public static final Expression D_LEFT_RIGHT_ARROW = new SpecialValue("<=>", "<=>", "\u21D4", "\\Leftrightarrow");
 
     final String inline;
-    final String ascii;
-    final String unicode;
+    final AsciiArt ascii;
+    final AsciiArt unicode;
     final String latex;
 
     SpecialValue(String inline, String ascii, String unicode, String latex) {
+        this(inline, new AsciiArt(ascii), new AsciiArt(unicode), latex);
+    }
+
+    SpecialValue(String inline, AsciiArt ascii, AsciiArt unicode, String latex) {
         this.inline = Arguments.checkNull(inline, "inline");
         this.ascii = Arguments.checkNull(ascii, "ascii");
         this.unicode = Arguments.checkNull(unicode, "unicode");
@@ -49,12 +53,12 @@ final class SpecialValue implements Expression {
 
     @Override
     public AsciiArt renderAscii() {
-        return new AsciiArt(ascii);
+        return ascii;
     }
 
     @Override
     public AsciiArt renderUnicode() {
-        return new AsciiArt(unicode);
+        return unicode;
     }
 
     @Override
