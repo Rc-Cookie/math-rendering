@@ -1,6 +1,7 @@
 package com.github.rccookie.math.rendering;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Objects;
 
 import com.github.rccookie.util.Arguments;
@@ -212,16 +213,50 @@ public interface RenderableExpression {
     // ---------------------------------------------------
 
     static RenderableExpression num(long value) {
-        return new NumberLiteral("" + value);
+        return num(value, 1);
     }
 
-    static RenderableExpression num(double value, boolean forcePlain) {
-        return new NumberLiteral(forcePlain ? new BigDecimal(""+value).toPlainString() : (""+value));
+    static RenderableExpression num(long numerator, long denominator) {
+        return num(numerator, denominator, true);
+    }
+
+    static RenderableExpression num(long numerator, long denominator, boolean precise) {
+        return num(BigInteger.valueOf(numerator), BigInteger.valueOf(denominator), precise);
+    }
+
+    static RenderableExpression num(BigInteger value) {
+        return num(value, BigInteger.ONE);
+    }
+
+    static RenderableExpression num(BigInteger numerator, BigInteger denominator) {
+        return num(numerator, denominator, true);
+    }
+
+    static RenderableExpression num(BigInteger numerator, BigInteger denominator, boolean precise) {
+        return new Rational(numerator, denominator, precise);
+    }
+
+    static RenderableExpression num(double value) {
+        return num(value, true);
+    }
+
+    static RenderableExpression num(double value, boolean precise) {
+        return num(new BigDecimal(value+""), precise);
+    }
+
+    static RenderableExpression num(BigDecimal value) {
+        return num(value, true);
+    }
+
+    static RenderableExpression num(BigDecimal value, boolean precise) {
+        return new Rational(value, precise);
     }
 
     static RenderableExpression num(String literal) {
         return new NumberLiteral(literal);
     }
+
+    // ---------------------------------------------------
 
     static RenderableExpression name(String literal) {
         return new Literal(false, literal);
@@ -389,7 +424,7 @@ public interface RenderableExpression {
     }
 
     static RenderableExpression list(RenderableExpression... values) {
-        return customList(num(","), values);
+        return customList(symbol(","), values);
     }
 
     static RenderableExpression customList(RenderableExpression delimiter, RenderableExpression... values) {
@@ -399,7 +434,7 @@ public interface RenderableExpression {
     // ---------------------------------------------------
 
     static RenderableExpression call(String fName, RenderableExpression... params) {
-        return call(num(fName), params);
+        return call(name(fName), params);
     }
 
     static RenderableExpression call(RenderableExpression f, RenderableExpression... params) {
@@ -619,7 +654,7 @@ public interface RenderableExpression {
     }
 
     static RenderableExpression lim(String var, RenderableExpression target, RenderableExpression value) {
-        return lim(num(var), target, value);
+        return lim(name(var), target, value);
     }
 
     static RenderableExpression lim(RenderableExpression var, RenderableExpression target, RenderableExpression value) {
@@ -631,7 +666,7 @@ public interface RenderableExpression {
     }
 
     static RenderableExpression integral(@Nullable RenderableExpression lowerBound, @Nullable RenderableExpression upperBound, RenderableExpression value, String indeterminant) {
-        return integral(lowerBound, upperBound, value, num(indeterminant));
+        return integral(lowerBound, upperBound, value, name(indeterminant));
     }
 
     static RenderableExpression integral(@Nullable RenderableExpression lowerBound, @Nullable RenderableExpression upperBound, RenderableExpression value, RenderableExpression indeterminant) {
@@ -641,11 +676,12 @@ public interface RenderableExpression {
 
     static void main(String[] args) {
         RenderableExpression[] es = {
-                def(num("A"), matrix(2, 2, not(par(and(num(1), num(0)))), frac(pi(), num(2)), call("exp", num(2), num(3)), neg(factorial(num(4))))),
-                root(num("123456"), augMatrix(grid(3,3, num(1), num(2), num(3), num(4), num(5), num(6), num(7), num(8), num(10)), column(num(10), num(20), num(30)))),
-                set(eq(sum(eq(num("k"), num(0)), inf(), frac(num(1), pow(num("q"), num("k")))), frac(num(1), minus(num(1), num("k")))), nIn(num("q"), par(list(num(0), num(1))))),
-                integral(num(2), num(5), pow(num("x"), num(2)), "x"),
-                eq(lim("x", inf(), frac(num(1), num("x"))), num(0))
+                def(name("A"), matrix(2, 2, not(par(and(num(1), num(0)))), frac(pi(), num(2)), call("exp", num(2), num(3)), neg(factorial(num(4))))),
+                root(num(123456), augMatrix(grid(3,3, num(1), num(2), num(3), num(4), num(5), num(6), num(7), num(8), num(10)), column(num(10), num(20), num(30)))),
+                set(eq(sum(eq(name("k"), num(0)), inf(), frac(num(1), pow(name("q"), name("k")))), frac(num(1), minus(num(1), name("k")))), nIn(name("q"), par(list(num(0), num(1))))),
+                integral(num(2), num(5), pow(name("x"), num(2)), "x"),
+                eq(lim("x", inf(), frac(num(1), name("x"))), num(0)),
+                plus(num(123456789.123456789), num(2,10)),
         };
         RenderOptions options = RenderOptions.DEFAULT;
         for(RenderableExpression e : es) {
@@ -717,7 +753,7 @@ public interface RenderableExpression {
         public enum DecimalMode {
             FORCE_DECIMAL,
             FORCE_FRACTION,
-            TRY_DECIMAL,
+            DECIMAL_IF_POSSIBLE,
             SMART
         }
     }

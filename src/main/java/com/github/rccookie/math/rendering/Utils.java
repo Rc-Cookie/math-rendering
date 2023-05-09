@@ -1,5 +1,6 @@
 package com.github.rccookie.math.rendering;
 
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
@@ -141,5 +142,50 @@ final class Utils {
         Node row = new Node("mrow");
         row.children.addAll(Arrays.asList(nodes));
         return row;
+    }
+
+
+    private static final BigInteger FIVE = BigInteger.valueOf(5);
+    @Nullable
+    public static BigInteger getFactorToPowerOfTen(BigInteger x) {
+        if(x.compareTo(BigInteger.ONE) == 0)
+            return BigInteger.ONE;
+
+        if(x.compareTo(BigInteger.ZERO) <= 0)
+            throw new ArithmeticException("Positive number expected");
+
+        BigInteger[] res;
+        int twoCount = 0, fiveCount = 0;
+
+        // Factor exists <=> prime factorization only consists of 2s and 5s
+        while(!x.testBit(0)) { // <=> x % 2 == 0
+            x = x.shiftRight(1); // <=> x /= 2
+            twoCount++;
+        }
+        while((res = x.divideAndRemainder(FIVE))[1].compareTo(BigInteger.ZERO) == 0) { // <=> x % 5 == 0
+            x = res[0]; // <=> x /= 5
+            fiveCount++;
+        }
+
+        // Other prime factors exist
+        if(x.compareTo(BigInteger.ONE) != 0) return null;
+
+        // Every 2*5 can be ignored, because it becomes a multiple of 10
+        if(twoCount == fiveCount) return BigInteger.ONE;
+        if(twoCount > fiveCount)
+            return FIVE.pow(twoCount - fiveCount);
+        return BigInteger.ONE.shiftLeft(fiveCount - twoCount);  // <=> 2^fiveCount
+    }
+
+    public static int log(BigInteger base, BigInteger x) {
+        if(base.compareTo(BigInteger.ZERO) <= 0 || x.compareTo(BigInteger.ZERO) <= 0)
+            throw new ArithmeticException("Positive numbers expected");
+
+        int log = 0;
+        while(x.compareTo(base) >= 0) {
+            x = x.divide(base);
+            log++;
+        }
+        return log;
     }
 }
