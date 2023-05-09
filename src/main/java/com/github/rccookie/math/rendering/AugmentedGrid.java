@@ -6,7 +6,7 @@ import com.github.rccookie.primitive.int2;
 import com.github.rccookie.util.Arguments;
 import com.github.rccookie.xml.Node;
 
-final class AugmentedGrid implements Expression {
+final class AugmentedGrid implements RenderableExpression {
 
     final Grid a, b;
 
@@ -23,37 +23,37 @@ final class AugmentedGrid implements Expression {
     }
 
     @Override
-    public String renderInline() {
+    public String renderInline(RenderOptions options) {
         StringBuilder str = new StringBuilder();
         for(int i=0; i<a.elements.length; i++) {
             if(i != 0) str.append(",");
             str.append("[");
-            for(Expression e : a.elements[i])
-                str.append(e.renderInline()).append(" ");
+            for(RenderableExpression e : a.elements[i])
+                str.append(e.renderInline(options)).append(" ");
             str.append("|");
-            for(Expression e : b.elements[i])
-                str.append(" ").append(e.renderInline());
+            for(RenderableExpression e : b.elements[i])
+                str.append(" ").append(e.renderInline(options));
             str.append("]");
         }
         return str.toString();
     }
 
     @Override
-    public AsciiArt renderAscii() {
-        return renderGrid(Expression::renderAscii, '|');
+    public AsciiArt renderAscii(RenderOptions options) {
+        return renderGrid(renderableExpression -> renderableExpression.renderAscii(options), '|');
     }
 
     @Override
-    public AsciiArt renderUnicode() {
-        return renderGrid(Expression::renderUnicode, '\u2502');
+    public AsciiArt renderUnicode(RenderOptions options) {
+        return renderGrid(renderableExpression -> renderableExpression.renderUnicode(options), '\u2502');
     }
 
     @Override
-    public AsciiArt renderAscii(CharacterSet charset) {
-        return renderGrid(e -> e.renderAscii(charset), charset.orFallback('\u2502', '|'));
+    public AsciiArt renderAscii(RenderOptions options, CharacterSet charset) {
+        return renderGrid(e -> e.renderAscii(options, charset), charset.orFallback('\u2502', '|'));
     }
 
-    private AsciiArt renderGrid(Function<Expression, AsciiArt> elementRenderer, char vert) {
+    private AsciiArt renderGrid(Function<RenderableExpression, AsciiArt> elementRenderer, char vert) {
         AsciiArt[][] elements = new AsciiArt[a.elements.length][a.elements[0].length + b.elements[0].length];
         for(int i=0; i<elements.length; i++) {
             for(int j=0; j<a.elements[i].length; j++)
@@ -87,14 +87,14 @@ final class AugmentedGrid implements Expression {
     }
 
     @Override
-    public String renderLatex() {
+    public String renderLatex(RenderOptions options) {
         StringBuilder str = new StringBuilder("\\begin{matrix}");
         for(int i=0; i<a.elements.length; i++) {
-            for(Expression e : a.elements[i])
-                str.append(e.renderInline()).append("&");
+            for(RenderableExpression e : a.elements[i])
+                str.append(e.renderInline(options)).append("&");
             str.append("\\bigm|");
-            for(Expression e : b.elements[i])
-                str.append("&").append(e.renderInline());
+            for(RenderableExpression e : b.elements[i])
+                str.append("&").append(e.renderInline(options));
             if(i != a.elements.length-1)
                 str.append("\\\\");
         }
@@ -102,7 +102,7 @@ final class AugmentedGrid implements Expression {
     }
 
     @Override
-    public Node renderMathMLNode() {
-        return new Middle(a,b).renderMathMLNode();
+    public Node renderMathMLNode(RenderOptions options) {
+        return new Middle(a,b).renderMathMLNode(options);
     }
 }

@@ -6,12 +6,12 @@ import java.util.function.Function;
 import com.github.rccookie.util.Arguments;
 import com.github.rccookie.xml.Node;
 
-final class List implements Expression {
+final class List implements RenderableExpression {
 
-    final Expression delimiter;
-    final Expression[] elements;
+    final RenderableExpression delimiter;
+    final RenderableExpression[] elements;
 
-    List(Expression delimiter, Expression[] elements) {
+    List(RenderableExpression delimiter, RenderableExpression[] elements) {
         this.delimiter = Arguments.checkNull(delimiter, "delimiter");
         this.elements = Arguments.deepCheckNull(elements, "elements");
     }
@@ -22,47 +22,47 @@ final class List implements Expression {
     }
 
     @Override
-    public String renderInline() {
-        return renderString(Expression::renderInline);
+    public String renderInline(RenderOptions options) {
+        return renderString(renderableExpression -> renderableExpression.renderInline(options));
     }
 
     @Override
-    public AsciiArt renderAscii() {
-        return renderAsciiArt(Expression::renderAscii);
+    public AsciiArt renderAscii(RenderOptions options) {
+        return renderAsciiArt(renderableExpression -> renderableExpression.renderAscii(options));
     }
 
     @Override
-    public AsciiArt renderUnicode() {
-        return renderAsciiArt(Expression::renderUnicode);
+    public AsciiArt renderUnicode(RenderOptions options) {
+        return renderAsciiArt(renderableExpression -> renderableExpression.renderUnicode(options));
     }
 
     @Override
-    public AsciiArt renderAscii(CharacterSet charset) {
-        return renderAsciiArt(e -> e.renderAscii(charset));
+    public AsciiArt renderAscii(RenderOptions options, CharacterSet charset) {
+        return renderAsciiArt(e -> e.renderAscii(options, charset));
     }
 
     @Override
-    public String renderLatex() {
-        return renderString(Expression::renderLatex);
+    public String renderLatex(RenderOptions options) {
+        return renderString(renderableExpression -> renderableExpression.renderLatex(options));
     }
 
     @Override
-    public Node renderMathMLNode() {
+    public Node renderMathMLNode(RenderOptions options) {
         Node list = new Node("mrow");
         if(elements.length == 0) return list;
 
-        list.children.add(elements[0].renderMathMLNode());
+        list.children.add(elements[0].renderMathMLNode(options));
         if(elements.length == 1) return list;
 
-        Node delimiter = this.delimiter.renderMathMLNode();
+        Node delimiter = this.delimiter.renderMathMLNode(options);
         for(int i=1; i<elements.length; i++) {
             list.children.add(delimiter.clone());
-            list.children.add(elements[i].renderMathMLNode());
+            list.children.add(elements[i].renderMathMLNode(options));
         }
         return list;
     }
 
-    private AsciiArt renderAsciiArt(Function<Expression, AsciiArt> renderer) {
+    private AsciiArt renderAsciiArt(Function<RenderableExpression, AsciiArt> renderer) {
         if(this.elements.length == 0) return new AsciiArt("");
 
         AsciiArt[] elements = Arrays.stream(this.elements).map(renderer).toArray(AsciiArt[]::new);
@@ -74,7 +74,7 @@ final class List implements Expression {
         return art;
     }
 
-    private String renderString(Function<Expression, String> renderer) {
+    private String renderString(Function<RenderableExpression, String> renderer) {
         if(elements.length == 0) return "";
         StringBuilder str = new StringBuilder(renderer.apply(elements[0]));
         for (int i = 1; i < elements.length; i++)

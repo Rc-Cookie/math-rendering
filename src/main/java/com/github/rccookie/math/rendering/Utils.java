@@ -131,8 +131,8 @@ final class Utils {
         return new Node("ms");
     }
 
-    public static Node orEmpty(@Nullable Expression e) {
-        return e != null ? e.renderMathMLNode() : emptyNode();
+    public static Node orEmpty(@Nullable RenderableExpression e, RenderableExpression.RenderOptions options) {
+        return e != null ? e.renderMathMLNode(options) : emptyNode();
     }
 
     public static Node join(Node... nodes) {

@@ -4,12 +4,12 @@ import com.github.rccookie.util.Arguments;
 import com.github.rccookie.xml.Node;
 import com.github.rccookie.xml.Text;
 
-final class Brackets implements Expression {
+final class Brackets implements RenderableExpression {
 
     final Bracket type;
-    final Expression inner;
+    final RenderableExpression inner;
 
-    Brackets(Bracket type, Expression inner) {
+    Brackets(Bracket type, RenderableExpression inner) {
         this.type = Arguments.checkNull(type, "type");
         this.inner = Arguments.checkNull(inner, "inner");
     }
@@ -20,33 +20,33 @@ final class Brackets implements Expression {
     }
 
     @Override
-    public String renderInline() {
+    public String renderInline(RenderOptions options) {
         if(type == Bracket.CEIL)
-            return "ceil("+inner.renderInline()+")";
+            return "ceil("+inner.renderInline(options)+")";
         if(type == Bracket.FLOOR)
-            return "floor("+inner.renderInline()+")";
-        return BracketLiteral.LEFT_SYMBOLS_ASCII[type.ordinal()] + inner.renderInline() + BracketLiteral.RIGHT_SYMBOLS_ASCII[type.ordinal()];
+            return "floor("+inner.renderInline(options)+")";
+        return BracketLiteral.LEFT_SYMBOLS_ASCII[type.ordinal()] + inner.renderInline(options) + BracketLiteral.RIGHT_SYMBOLS_ASCII[type.ordinal()];
     }
 
     @Override
-    public AsciiArt renderAscii() {
-        AsciiArt inner = this.inner.renderAscii();
+    public AsciiArt renderAscii(RenderOptions options) {
+        AsciiArt inner = this.inner.renderAscii(options);
         return BracketLiteral.renderBracketAscii(type, true, inner.height())
                 .appendBottom(inner)
                 .appendBottom(BracketLiteral.renderBracketAscii(type, false, inner.height()));
     }
 
     @Override
-    public AsciiArt renderUnicode() {
-        AsciiArt inner = this.inner.renderUnicode();
+    public AsciiArt renderUnicode(RenderOptions options) {
+        AsciiArt inner = this.inner.renderUnicode(options);
         return BracketLiteral.renderBracketUnicode(type, true, inner.height())
                 .appendBottom(inner)
                 .appendBottom(BracketLiteral.renderBracketUnicode(type, false, inner.height()));
     }
 
     @Override
-    public AsciiArt renderAscii(CharacterSet charset) {
-        AsciiArt inner = this.inner.renderAscii(charset);
+    public AsciiArt renderAscii(RenderOptions options, CharacterSet charset) {
+        AsciiArt inner = this.inner.renderAscii(options, charset);
         AsciiArt left = BracketLiteral.renderBracketUnicode(type, true, inner.height());
         AsciiArt right;
         if(!charset.canDisplay(left.toString())) {
@@ -59,12 +59,12 @@ final class Brackets implements Expression {
     }
 
     @Override
-    public String renderLatex() {
-        return "\\left" + BracketLiteral.LEFT_LATEX[type.ordinal()] + inner.renderLatex() + "\\right" + BracketLiteral.RIGHT_LATEX[type.ordinal()];
+    public String renderLatex(RenderOptions options) {
+        return "\\left" + BracketLiteral.LEFT_LATEX[type.ordinal()] + inner.renderLatex(options) + "\\right" + BracketLiteral.RIGHT_LATEX[type.ordinal()];
     }
 
     @Override
-    public Node renderMathMLNode() {
+    public Node renderMathMLNode(RenderOptions options) {
         Node left = new Node("mo"), right = new Node("mo");
         left.children.add(new Text(BracketLiteral.LEFT_SYMBOLS_UNICODE[type.ordinal()]));
         right.children.add(new Text(BracketLiteral.RIGHT_SYMBOLS_UNICODE[type.ordinal()]));
@@ -72,6 +72,6 @@ final class Brackets implements Expression {
         right.attributes.put("fence", "true");
         left.attributes.put("stretchy", "true");
         right.attributes.put("stretchy", "true");
-        return Utils.join(left, inner.renderMathMLNode(), right);
+        return Utils.join(left, inner.renderMathMLNode(options), right);
     }
 }

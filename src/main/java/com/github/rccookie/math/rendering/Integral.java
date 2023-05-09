@@ -9,15 +9,15 @@ import com.github.rccookie.xml.Text;
 
 import org.jetbrains.annotations.Nullable;
 
-final class Integral implements Expression {
+final class Integral implements RenderableExpression {
 
     @Nullable
-    final Expression a;
+    final RenderableExpression a;
     @Nullable
-    final Expression b;
-    final Expression value;
+    final RenderableExpression b;
+    final RenderableExpression value;
 
-    Integral(@Nullable Expression a, @Nullable Expression b, Expression value) {
+    Integral(@Nullable RenderableExpression a, @Nullable RenderableExpression b, RenderableExpression value) {
         this.a = a;
         this.b = b;
         this.value = Arguments.checkNull(value, "value");
@@ -29,28 +29,28 @@ final class Integral implements Expression {
     }
 
     @Override
-    public String renderInline() {
-        return new BigSymbol(Expression.num("\u222B"), a, b, value).renderInline();
+    public String renderInline(RenderOptions options) {
+        return new BigSymbol(RenderableExpression.num("\u222B"), a, b, value).renderInline(options);
     }
 
     @Override
-    public AsciiArt renderAscii() {
-        return renderArt(Expression::renderAscii, 3, null, "/", "|", "/");
+    public AsciiArt renderAscii(RenderOptions options) {
+        return renderArt(renderableExpression -> renderableExpression.renderAscii(options), 3, null, "/", "|", "/");
     }
 
     @Override
-    public AsciiArt renderUnicode() {
-        return renderArt(Expression::renderUnicode, 1, "\u222B", "\u2320", "\u23AE", "\u2321");
+    public AsciiArt renderUnicode(RenderOptions options) {
+        return renderArt(renderableExpression -> renderableExpression.renderUnicode(options), 1, "\u222B", "\u2320", "\u23AE", "\u2321");
     }
 
     @Override
-    public AsciiArt renderAscii(CharacterSet charset) {
+    public AsciiArt renderAscii(RenderOptions options, CharacterSet charset) {
         if(charset.canDisplay("\u222B\u2320\u23AE\u2321"))
-            return renderArt(e -> e.renderAscii(charset), 1, "\u222B", "\u2320", "\u23AE", "\u2321");
-        return renderArt(e -> e.renderAscii(charset), 3, null, "/", "|", "/");
+            return renderArt(e -> e.renderAscii(options, charset), 1, "\u222B", "\u2320", "\u23AE", "\u2321");
+        return renderArt(e -> e.renderAscii(options, charset), 3, null, "/", "|", "/");
     }
 
-    private AsciiArt renderArt(Function<Expression, AsciiArt> renderer, int minHeight, String inline, String top, String middle, String bottom) {
+    private AsciiArt renderArt(Function<RenderableExpression, AsciiArt> renderer, int minHeight, String inline, String top, String middle, String bottom) {
         AsciiArt value = renderer.apply(this.value);
         AsciiArt symbol = createSymbol(value.height(), minHeight, inline, top, middle, bottom);
 
@@ -73,18 +73,18 @@ final class Integral implements Expression {
     }
 
     @Override
-    public String renderLatex() {
-        return new BigSymbol(Expression.num("\u222B"), a, b, value).renderLatex();
+    public String renderLatex(RenderOptions options) {
+        return new BigSymbol(RenderableExpression.num("\u222B"), a, b, value).renderLatex(options);
     }
 
     @Override
-    public Node renderMathMLNode() {
+    public Node renderMathMLNode(RenderOptions options) {
         Node symbol = new Node("mo");
         Node underOver = new Node("munderover");
         symbol.children.add(new Text("\u222B"));
         underOver.children.add(symbol);
-        underOver.children.add(Utils.orEmpty(a));
-        underOver.children.add(Utils.orEmpty(b));
-        return Utils.join(underOver, value.renderMathMLNode());
+        underOver.children.add(Utils.orEmpty(a, options));
+        underOver.children.add(Utils.orEmpty(b, options));
+        return Utils.join(underOver, value.renderMathMLNode(options));
     }
 }

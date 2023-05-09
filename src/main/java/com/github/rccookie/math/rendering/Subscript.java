@@ -4,11 +4,11 @@ import com.github.rccookie.primitive.int2;
 import com.github.rccookie.util.Arguments;
 import com.github.rccookie.xml.Node;
 
-final class Subscript implements Expression {
+final class Subscript implements RenderableExpression {
 
-    final Expression a, b;
+    final RenderableExpression a, b;
 
-    Subscript(Expression a, Expression b) {
+    Subscript(RenderableExpression a, RenderableExpression b) {
         this.a = Arguments.checkNull(a, "a");
         this.b = Arguments.checkNull(b, "b");
     }
@@ -19,8 +19,8 @@ final class Subscript implements Expression {
     }
 
     @Override
-    public String renderInline() {
-        String a = this.a.renderInline(), b = this.b.renderInline();
+    public String renderInline(RenderOptions options) {
+        String a = this.a.renderInline(options), b = this.b.renderInline(options);
         if(!Utils.isSubscript(a)) {
             String subscript = Utils.toSubscript(b);
             if(subscript != null) return a + subscript;
@@ -29,13 +29,13 @@ final class Subscript implements Expression {
     }
 
     @Override
-    public AsciiArt renderAscii() {
-        return renderArt(a.renderAscii(), b.renderAscii(), a instanceof Subscript || a instanceof SuperSubscript, null);
+    public AsciiArt renderAscii(RenderOptions options) {
+        return renderArt(a.renderAscii(options), b.renderAscii(options), a instanceof Subscript || a instanceof SuperSubscript, null);
     }
 
     @Override
-    public AsciiArt renderUnicode() {
-        AsciiArt a = this.a.renderUnicode(), b = this.b.renderUnicode();
+    public AsciiArt renderUnicode(RenderOptions options) {
+        AsciiArt a = this.a.renderUnicode(options), b = this.b.renderUnicode(options);
         if(b.height() == 1 && !Utils.isSubscript(a.toString())) {
             String subscript = Utils.toSubscript(b.getLine(0));
             if(subscript != null)
@@ -45,8 +45,8 @@ final class Subscript implements Expression {
     }
 
     @Override
-    public AsciiArt renderAscii(CharacterSet charset) {
-        AsciiArt a = this.a.renderAscii(charset), b = this.b.renderAscii(charset);
+    public AsciiArt renderAscii(RenderOptions options, CharacterSet charset) {
+        AsciiArt a = this.a.renderAscii(options, charset), b = this.b.renderAscii(options, charset);
         if(b.height() == 1 && !Utils.isSubscript(a.toString())) {
             String subscript = Utils.toSubscript(b.getLine(0));
             if(subscript != null && charset.canDisplay(subscript))
@@ -63,15 +63,15 @@ final class Subscript implements Expression {
     }
 
     @Override
-    public String renderLatex() {
-        return "{"+a.renderLatex()+"}_{"+b.renderLatex()+"}";
+    public String renderLatex(RenderOptions options) {
+        return "{"+a.renderLatex(options)+"}_{"+b.renderLatex(options)+"}";
     }
 
     @Override
-    public Node renderMathMLNode() {
+    public Node renderMathMLNode(RenderOptions options) {
         Node sub = new Node("msub");
-        sub.children.add(a.renderMathMLNode());
-        sub.children.add(b.renderMathMLNode());
+        sub.children.add(a.renderMathMLNode(options));
+        sub.children.add(b.renderMathMLNode(options));
         return sub;
     }
 }

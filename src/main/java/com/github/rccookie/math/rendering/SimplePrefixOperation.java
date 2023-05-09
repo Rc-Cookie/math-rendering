@@ -3,48 +3,48 @@ package com.github.rccookie.math.rendering;
 import com.github.rccookie.util.Arguments;
 import com.github.rccookie.xml.Node;
 
-final class SimplePrefixOperation implements Expression {
+final class SimplePrefixOperation implements RenderableExpression {
 
-    final Expression value;
-    final Expression symbol;
+    final RenderableExpression value;
+    final RenderableExpression symbol;
 
-    SimplePrefixOperation(Expression value, Expression symbol) {
+    SimplePrefixOperation(RenderableExpression value, RenderableExpression symbol) {
         this.value = Arguments.checkNull(value, "value");
         this.symbol = Arguments.checkNull(symbol, "symbol");
     }
 
     @Override
     public String toString() {
-        return "prefix("+symbol.renderInline().trim()+", "+value+")";
+        return "prefix("+symbol.toString().trim()+", "+value+")";
     }
 
     @Override
-    public String renderInline() {
-        return symbol.renderInline() + value.renderInline();
+    public String renderInline(RenderOptions options) {
+        return symbol.renderInline(options) + value.renderInline(options);
     }
 
     @Override
-    public AsciiArt renderAscii() {
-        return symbol.renderAscii().appendCenter(value.renderAscii());
+    public AsciiArt renderAscii(RenderOptions options) {
+        return symbol.renderAscii(options).appendCenter(value.renderAscii(options));
     }
 
     @Override
-    public AsciiArt renderUnicode() {
-        return symbol.renderUnicode().appendCenter(value.renderUnicode());
+    public AsciiArt renderUnicode(RenderOptions options) {
+        return symbol.renderUnicode(options).appendCenter(value.renderUnicode(options));
     }
 
     @Override
-    public AsciiArt renderAscii(CharacterSet charset) {
-        return symbol.renderAscii(charset).appendCenter(value.renderAscii(charset));
+    public AsciiArt renderAscii(RenderOptions options, CharacterSet charset) {
+        return symbol.renderAscii(options, charset).appendCenter(value.renderAscii(options, charset));
     }
 
     @Override
-    public String renderLatex() {
-        return symbol.renderLatex()+"{"+value.renderLatex()+"}";
+    public String renderLatex(RenderOptions options) {
+        return symbol.renderLatex(options)+"{"+value.renderLatex(options)+"}";
     }
 
     @Override
-    public Node renderMathMLNode() {
-        return Utils.join(symbol.renderMathMLNode(), value.renderMathMLNode());
+    public Node renderMathMLNode(RenderOptions options) {
+        return Utils.join(symbol.renderMathMLNode(options), value.renderMathMLNode(options));
     }
 }

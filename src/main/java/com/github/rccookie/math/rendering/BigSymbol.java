@@ -8,16 +8,16 @@ import com.github.rccookie.xml.Node;
 
 import org.jetbrains.annotations.Nullable;
 
-final class BigSymbol implements Expression {
+final class BigSymbol implements RenderableExpression {
 
-    final Expression symbol;
+    final RenderableExpression symbol;
     @Nullable
-    final Expression sup;
+    final RenderableExpression sup;
     @Nullable
-    final Expression sub;
-    final Expression value;
+    final RenderableExpression sub;
+    final RenderableExpression value;
 
-    BigSymbol(Expression symbol, @Nullable Expression sub, @Nullable Expression sup, Expression value) {
+    BigSymbol(RenderableExpression symbol, @Nullable RenderableExpression sub, @Nullable RenderableExpression sup, RenderableExpression value) {
         this.symbol = Arguments.checkNull(symbol, "symbol");
         this.sup = sup;
         this.sub = sub;
@@ -30,35 +30,35 @@ final class BigSymbol implements Expression {
     }
 
     @Override
-    public String renderInline() {
+    public String renderInline(RenderOptions options) {
         String header;
         if(sup == null) {
-            if(sub == null) header = symbol.renderInline();
-            else header = new Subscript(symbol, sub).renderInline();
+            if(sub == null) header = symbol.renderInline(options);
+            else header = new Subscript(symbol, sub).renderInline(options);
         }
         else if(sub == null)
-            header = new Superscript(symbol, sup).renderInline();
-        else header = new SuperSubscript(symbol, sup, sub).renderInline();
+            header = new Superscript(symbol, sup).renderInline(options);
+        else header = new SuperSubscript(symbol, sup, sub).renderInline(options);
 
-        return header + Utils.encapsulate(value.renderInline());
+        return header + Utils.encapsulate(value.renderInline(options));
     }
 
     @Override
-    public AsciiArt renderAscii() {
-        return renderArt(Expression::renderAscii);
+    public AsciiArt renderAscii(RenderOptions options) {
+        return renderArt(renderableExpression -> renderableExpression.renderAscii(options));
     }
 
     @Override
-    public AsciiArt renderUnicode() {
-        return renderArt(Expression::renderUnicode);
+    public AsciiArt renderUnicode(RenderOptions options) {
+        return renderArt(renderableExpression -> renderableExpression.renderUnicode(options));
     }
 
     @Override
-    public AsciiArt renderAscii(CharacterSet charset) {
-        return renderArt(e -> e.renderAscii(charset));
+    public AsciiArt renderAscii(RenderOptions options, CharacterSet charset) {
+        return renderArt(e -> e.renderAscii(options, charset));
     }
 
-    private AsciiArt renderArt(Function<Expression, AsciiArt> renderer) {
+    private AsciiArt renderArt(Function<RenderableExpression, AsciiArt> renderer) {
         AsciiArt symbol = renderer.apply(this.symbol);
         AsciiArt art = symbol;
         if(this.sub != null) {
@@ -74,19 +74,19 @@ final class BigSymbol implements Expression {
     }
 
     @Override
-    public String renderLatex() {
-        String str = symbol.renderLatex();
-        if(sub != null) str += "_{"+sub.renderLatex()+"}";
-        if(sup != null) str += "^{"+sup.renderLatex()+"}";
-        return str+"{"+value.renderLatex()+"}";
+    public String renderLatex(RenderOptions options) {
+        String str = symbol.renderLatex(options);
+        if(sub != null) str += "_{"+sub.renderLatex(options)+"}";
+        if(sup != null) str += "^{"+sup.renderLatex(options)+"}";
+        return str+"{"+value.renderLatex(options)+"}";
     }
 
     @Override
-    public Node renderMathMLNode() {
+    public Node renderMathMLNode(RenderOptions options) {
         Node underOver = new Node("munderover");
-        underOver.children.add(symbol.renderMathMLNode());
-        underOver.children.add(Utils.orEmpty(sub));
-        underOver.children.add(Utils.orEmpty(sup));
-        return Utils.join(underOver, value.renderMathMLNode());
+        underOver.children.add(symbol.renderMathMLNode(options));
+        underOver.children.add(Utils.orEmpty(sub, options));
+        underOver.children.add(Utils.orEmpty(sup, options));
+        return Utils.join(underOver, value.renderMathMLNode(options));
     }
 }

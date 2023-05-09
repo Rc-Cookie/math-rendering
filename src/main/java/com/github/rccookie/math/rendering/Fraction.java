@@ -4,12 +4,12 @@ import com.github.rccookie.primitive.int2;
 import com.github.rccookie.util.Arguments;
 import com.github.rccookie.xml.Node;
 
-final class Fraction implements Expression {
+final class Fraction implements RenderableExpression {
 
-    final Expression a;
-    final Expression b;
+    final RenderableExpression a;
+    final RenderableExpression b;
 
-    Fraction(Expression a, Expression b) {
+    Fraction(RenderableExpression a, RenderableExpression b) {
         this.a = Arguments.checkNull(a, "a");
         this.b = Arguments.checkNull(b, "b");
     }
@@ -20,23 +20,23 @@ final class Fraction implements Expression {
     }
 
     @Override
-    public String renderInline() {
-        return Utils.encapsulate(a.renderInline())+"/"+Utils.encapsulate(b.renderInline());
+    public String renderInline(RenderOptions options) {
+        return Utils.encapsulate(a.renderInline(options))+"/"+Utils.encapsulate(b.renderInline(options));
     }
 
     @Override
-    public AsciiArt renderAscii() {
-        return renderFraction(a.renderAscii(), b.renderAscii());
+    public AsciiArt renderAscii(RenderOptions options) {
+        return renderFraction(a.renderAscii(options), b.renderAscii(options));
     }
 
     @Override
-    public AsciiArt renderUnicode() {
-        return renderFraction(a.renderUnicode(), b.renderUnicode());
+    public AsciiArt renderUnicode(RenderOptions options) {
+        return renderFraction(a.renderUnicode(options), b.renderUnicode(options));
     }
 
     @Override
-    public AsciiArt renderAscii(CharacterSet charset) {
-        return renderFraction(a.renderAscii(charset), b.renderAscii(charset));
+    public AsciiArt renderAscii(RenderOptions options, CharacterSet charset) {
+        return renderFraction(a.renderAscii(options, charset), b.renderAscii(options, charset));
     }
 
     private static AsciiArt renderFraction(AsciiArt a, AsciiArt b) {
@@ -47,15 +47,15 @@ final class Fraction implements Expression {
     }
 
     @Override
-    public String renderLatex() {
-        return "\\frac{"+a.renderLatex()+"}{"+b.renderLatex()+"}";
+    public String renderLatex(RenderOptions options) {
+        return "\\frac{"+a.renderLatex(options)+"}{"+b.renderLatex(options)+"}";
     }
 
     @Override
-    public Node renderMathMLNode() {
+    public Node renderMathMLNode(RenderOptions options) {
         Node frac = new Node("mfrac");
-        frac.children.add(a.renderMathMLNode());
-        frac.children.add(b.renderMathMLNode());
+        frac.children.add(a.renderMathMLNode(options));
+        frac.children.add(b.renderMathMLNode(options));
         return frac;
     }
 }

@@ -4,11 +4,11 @@ import com.github.rccookie.util.Arguments;
 import com.github.rccookie.xml.Node;
 import com.github.rccookie.xml.Text;
 
-final class Number implements Expression {
+final class NumberLiteral implements RenderableExpression {
 
     final String value;
 
-    Number(String value) {
+    NumberLiteral(String value) {
         this.value = Arguments.checkNull(value, "value");
     }
 
@@ -18,32 +18,32 @@ final class Number implements Expression {
     }
 
     @Override
-    public String renderInline() {
+    public String renderInline(RenderOptions options) {
         return value.replace('\n', ' ');
     }
 
     @Override
-    public AsciiArt renderAscii() {
+    public AsciiArt renderAscii(RenderOptions options) {
         return new AsciiArt(value);
     }
 
     @Override
-    public AsciiArt renderUnicode() {
+    public AsciiArt renderUnicode(RenderOptions options) {
         return new AsciiArt(value);
     }
 
     @Override
-    public AsciiArt renderAscii(CharacterSet charset) {
+    public AsciiArt renderAscii(RenderOptions options, CharacterSet charset) {
         return new AsciiArt(value);
     }
 
     @Override
-    public String renderLatex() {
+    public String renderLatex(RenderOptions options) {
         return value;
     }
 
     @Override
-    public Node renderMathMLNode() {
+    public Node renderMathMLNode(RenderOptions options) {
         Node n = new Node("mn");
         n.children.add(new Text(value));
         return n;

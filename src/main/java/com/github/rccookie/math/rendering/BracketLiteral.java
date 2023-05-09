@@ -4,7 +4,7 @@ import com.github.rccookie.util.Arguments;
 import com.github.rccookie.xml.Node;
 import com.github.rccookie.xml.Text;
 
-final class BracketLiteral implements Expression {
+final class BracketLiteral implements RenderableExpression {
 
     static final String[] LEFT_SYMBOLS_ASCII = { "(", "[", "{", "<", "[", "|_", "|" };
     static final String[] RIGHT_SYMBOLS_ASCII = { ")", "]", "}", ">", "]", "_|", "|" };
@@ -15,9 +15,9 @@ final class BracketLiteral implements Expression {
 
     final Bracket type;
     final boolean left;
-    final Expression inner;
+    final RenderableExpression inner;
 
-    BracketLiteral(Bracket type, boolean left, Expression inner) {
+    BracketLiteral(Bracket type, boolean left, RenderableExpression inner) {
         this.type = Arguments.checkNull(type, "type");
         this.left = left;
         this.inner = Arguments.checkNull(inner, "inner");
@@ -29,25 +29,25 @@ final class BracketLiteral implements Expression {
     }
 
     @Override
-    public String renderInline() {
-        return (left ? LEFT_SYMBOLS_ASCII : RIGHT_SYMBOLS_ASCII)[type.ordinal()] + inner.renderInline();
+    public String renderInline(RenderOptions options) {
+        return (left ? LEFT_SYMBOLS_ASCII : RIGHT_SYMBOLS_ASCII)[type.ordinal()] + inner.renderInline(options);
     }
 
     @Override
-    public AsciiArt renderAscii() {
-        AsciiArt inner = this.inner.renderAscii();
+    public AsciiArt renderAscii(RenderOptions options) {
+        AsciiArt inner = this.inner.renderAscii(options);
         return renderBracketAscii(type, left, inner.height()).appendTop(inner);
     }
 
     @Override
-    public AsciiArt renderUnicode() {
-        AsciiArt inner = this.inner.renderUnicode();
+    public AsciiArt renderUnicode(RenderOptions options) {
+        AsciiArt inner = this.inner.renderUnicode(options);
         return renderBracketUnicode(type, left, inner.height()).appendTop(inner);
     }
 
     @Override
-    public AsciiArt renderAscii(CharacterSet charset) {
-        AsciiArt inner = this.inner.renderAscii(charset);
+    public AsciiArt renderAscii(RenderOptions options, CharacterSet charset) {
+        AsciiArt inner = this.inner.renderAscii(options, charset);
         AsciiArt bracket = renderBracketUnicode(type, left, inner.height());
         if(!charset.canDisplay(inner.toString()))
             bracket = renderBracketAscii(type, left, inner.height());
@@ -55,19 +55,19 @@ final class BracketLiteral implements Expression {
     }
 
     @Override
-    public String renderLatex() {
+    public String renderLatex(RenderOptions options) {
         if(left)
-            return "\\left" + LEFT_LATEX[type.ordinal()] + inner.renderLatex() + "\\right.";
-        return "\\left." + inner.renderLatex() + "\\right" + RIGHT_LATEX[type.ordinal()];
+            return "\\left" + LEFT_LATEX[type.ordinal()] + inner.renderLatex(options) + "\\right.";
+        return "\\left." + inner.renderLatex(options) + "\\right" + RIGHT_LATEX[type.ordinal()];
     }
 
     @Override
-    public Node renderMathMLNode() {
+    public Node renderMathMLNode(RenderOptions options) {
         Node o = new Node("mo");
         o.children.add(new Text((left ? LEFT_SYMBOLS_UNICODE : RIGHT_SYMBOLS_UNICODE)[type.ordinal()]));
         o.attributes.put("fence", "true");
         o.attributes.put("stretchy", "true");
-        return Utils.join(o, inner.renderMathMLNode());
+        return Utils.join(o, inner.renderMathMLNode(options));
     }
 
     @SuppressWarnings("UnnecessaryUnicodeEscape")

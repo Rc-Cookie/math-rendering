@@ -4,11 +4,11 @@ import com.github.rccookie.util.Arguments;
 import com.github.rccookie.xml.Node;
 import com.github.rccookie.xml.Text;
 
-final class Middle implements Expression {
+final class Middle implements RenderableExpression {
 
-    private final Expression a, b;
+    private final RenderableExpression a, b;
 
-    Middle(Expression a, Expression b) {
+    Middle(RenderableExpression a, RenderableExpression b) {
         this.a = Arguments.checkNull(a, "a");
         this.b = Arguments.checkNull(b, "b");
     }
@@ -19,23 +19,23 @@ final class Middle implements Expression {
     }
 
     @Override
-    public String renderInline() {
-        return a.renderInline() + " | " + b.renderInline();
+    public String renderInline(RenderOptions options) {
+        return a.renderInline(options) + " | " + b.renderInline(options);
     }
 
     @Override
-    public AsciiArt renderAscii() {
-        return renderArt(a.renderAscii(), b.renderAscii(), "|");
+    public AsciiArt renderAscii(RenderOptions options) {
+        return renderArt(a.renderAscii(options), b.renderAscii(options), "|");
     }
 
     @Override
-    public AsciiArt renderUnicode() {
-        return renderArt(a.renderUnicode(), b.renderUnicode(), "\u2502");
+    public AsciiArt renderUnicode(RenderOptions options) {
+        return renderArt(a.renderUnicode(options), b.renderUnicode(options), "\u2502");
     }
 
     @Override
-    public AsciiArt renderAscii(CharacterSet charset) {
-        return renderArt(a.renderAscii(charset), b.renderAscii(charset), charset.orFallback("|", "\u2502"));
+    public AsciiArt renderAscii(RenderOptions options, CharacterSet charset) {
+        return renderArt(a.renderAscii(options, charset), b.renderAscii(options, charset), charset.orFallback("|", "\u2502"));
     }
 
     private static AsciiArt renderArt(AsciiArt a, AsciiArt b, String bar) {
@@ -46,17 +46,17 @@ final class Middle implements Expression {
     }
 
     @Override
-    public String renderLatex() {
-        return "\\left."+a.renderLatex()+"\\;\\middle|\\;"+b.renderLatex()+"\\right.";
+    public String renderLatex(RenderOptions options) {
+        return "\\left."+a.renderLatex(options)+"\\;\\middle|\\;"+b.renderLatex(options)+"\\right.";
     }
 
     @Override
-    public Node renderMathMLNode() {
+    public Node renderMathMLNode(RenderOptions options) {
         Node o = new Node("mo");
         o.children.add(new Text("|"));
         o.attributes.put("separator", "true");
         o.attributes.put("fence", "true");
         o.attributes.put("stretchy", "true");
-        return Utils.join(a.renderMathMLNode(), o, b.renderMathMLNode());
+        return Utils.join(a.renderMathMLNode(options), o, b.renderMathMLNode(options));
     }
 }

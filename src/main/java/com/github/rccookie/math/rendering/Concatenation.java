@@ -5,13 +5,13 @@ import java.util.Set;
 import com.github.rccookie.util.Arguments;
 import com.github.rccookie.xml.Node;
 
-final class Concatenation implements Expression {
+final class Concatenation implements RenderableExpression {
 
-    final Expression a;
-    final Expression b;
+    final RenderableExpression a;
+    final RenderableExpression b;
     final boolean maybeSpace;
 
-    Concatenation(Expression a, Expression b, boolean maybeSpace) {
+    Concatenation(RenderableExpression a, RenderableExpression b, boolean maybeSpace) {
         this.a = Arguments.checkNull(a, "a");
         this.b = Arguments.checkNull(b, "b");
         this.maybeSpace = maybeSpace;
@@ -23,46 +23,46 @@ final class Concatenation implements Expression {
     }
 
     @Override
-    public String renderInline() {
-        return a.renderInline() + (renderSpace() ? " " : "") + b.renderInline();
+    public String renderInline(RenderOptions options) {
+        return a.renderInline(options) + (renderSpace() ? " " : "") + b.renderInline(options);
     }
 
     @Override
-    public AsciiArt renderAscii() {
+    public AsciiArt renderAscii(RenderOptions options) {
         if(renderSpace())
-            return a.renderAscii().appendTop(new AsciiArt(" ")).appendCenter(b.renderAscii());
-        return a.renderAscii().appendCenter(b.renderAscii());
+            return a.renderAscii(options).appendTop(new AsciiArt(" ")).appendCenter(b.renderAscii(options));
+        return a.renderAscii(options).appendCenter(b.renderAscii(options));
     }
 
     @Override
-    public AsciiArt renderUnicode() {
+    public AsciiArt renderUnicode(RenderOptions options) {
         if(renderSpace())
-            return a.renderUnicode().appendTop(new AsciiArt(" ")).appendCenter(b.renderUnicode());
-        return a.renderUnicode().appendCenter(b.renderUnicode());
+            return a.renderUnicode(options).appendTop(new AsciiArt(" ")).appendCenter(b.renderUnicode(options));
+        return a.renderUnicode(options).appendCenter(b.renderUnicode(options));
     }
 
     @Override
-    public AsciiArt renderAscii(CharacterSet charset) {
+    public AsciiArt renderAscii(RenderOptions options, CharacterSet charset) {
         if(renderSpace())
-            return a.renderAscii(charset).appendTop(new AsciiArt(" ")).appendCenter(b.renderAscii(charset));
-        return a.renderAscii(charset).appendCenter(b.renderAscii(charset));
+            return a.renderAscii(options, charset).appendTop(new AsciiArt(" ")).appendCenter(b.renderAscii(options, charset));
+        return a.renderAscii(options, charset).appendCenter(b.renderAscii(options, charset));
     }
 
     @Override
-    public String renderLatex() {
+    public String renderLatex(RenderOptions options) {
         if(renderSpace())
-            return a.renderLatex() + " \\; " + b.renderLatex();
-        return a.renderLatex() + " " + b.renderLatex(); // Math mode, spaces are ignored
+            return a.renderLatex(options) + " \\; " + b.renderLatex(options);
+        return a.renderLatex(options) + " " + b.renderLatex(options); // Math mode, spaces are ignored
     }
 
     @Override
-    public Node renderMathMLNode() {
+    public Node renderMathMLNode(RenderOptions options) {
         if(renderSpace())
-            return Utils.join(a.renderMathMLNode(), new Node("mspace"), b.renderMathMLNode());
-        return Utils.join(a.renderMathMLNode(), b.renderMathMLNode());
+            return Utils.join(a.renderMathMLNode(options), new Node("mspace"), b.renderMathMLNode(options));
+        return Utils.join(a.renderMathMLNode(options), b.renderMathMLNode(options));
     }
 
-    private static final Set<Class<? extends Expression>> NO_SPACE_TYPES = Set.of(
+    private static final Set<Class<? extends RenderableExpression>> NO_SPACE_TYPES = Set.of(
             Brackets.class,
             BracketLiteral.class,
             Fraction.class,
@@ -73,9 +73,9 @@ final class Concatenation implements Expression {
         if(!maybeSpace) return false;
         if(NO_SPACE_TYPES.contains(a.getClass()) || NO_SPACE_TYPES.contains(b.getClass()))
             return false;
-        if(!(a instanceof Number && b instanceof Number)) return true;
+        if(!(a instanceof NumberLiteral && b instanceof NumberLiteral)) return true;
 
-        String a = ((Number) this.a).value, b = ((Number) this.b).value;
+        String a = ((NumberLiteral) this.a).value, b = ((NumberLiteral) this.b).value;
         if(a.isEmpty() || b.isEmpty()) return false;
         if(a.contains("\n") || b.contains("\n")) return true;
 

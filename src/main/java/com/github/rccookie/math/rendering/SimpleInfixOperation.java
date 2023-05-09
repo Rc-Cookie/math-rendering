@@ -3,13 +3,13 @@ package com.github.rccookie.math.rendering;
 import com.github.rccookie.util.Arguments;
 import com.github.rccookie.xml.Node;
 
-final class SimpleInfixOperation implements Expression {
+final class SimpleInfixOperation implements RenderableExpression {
 
-    final Expression a;
-    final Expression b;
-    final Expression symbol;
+    final RenderableExpression a;
+    final RenderableExpression b;
+    final RenderableExpression symbol;
 
-    SimpleInfixOperation(Expression a, Expression b, Expression symbol) {
+    SimpleInfixOperation(RenderableExpression a, RenderableExpression b, RenderableExpression symbol) {
         this.a = Arguments.checkNull(a, "a");
         this.b = Arguments.checkNull(b, "b");
         this.symbol = Arguments.checkNull(symbol, "symbol");
@@ -17,27 +17,27 @@ final class SimpleInfixOperation implements Expression {
 
     @Override
     public String toString() {
-        return symbol.renderInline().trim()+"("+a+", "+b+")";
+        return symbol.toString().trim()+"("+a+", "+b+")";
     }
 
     @Override
-    public String renderInline() {
-        return a.renderInline() + symbol.renderInline() + b.renderInline();
+    public String renderInline(RenderOptions options) {
+        return a.renderInline(options) + symbol.renderInline(options) + b.renderInline(options);
     }
 
     @Override
-    public AsciiArt renderAscii() {
-        return renderArt(a.renderAscii(), b.renderAscii(), symbol.renderAscii());
+    public AsciiArt renderAscii(RenderOptions options) {
+        return renderArt(a.renderAscii(options), b.renderAscii(options), symbol.renderAscii(options));
     }
 
     @Override
-    public AsciiArt renderUnicode() {
-        return renderArt(a.renderUnicode(), b.renderUnicode(), symbol.renderUnicode());
+    public AsciiArt renderUnicode(RenderOptions options) {
+        return renderArt(a.renderUnicode(options), b.renderUnicode(options), symbol.renderUnicode(options));
     }
 
     @Override
-    public AsciiArt renderAscii(CharacterSet charset) {
-        return renderArt(a.renderAscii(charset), b.renderAscii(charset), symbol.renderAscii(charset));
+    public AsciiArt renderAscii(RenderOptions options, CharacterSet charset) {
+        return renderArt(a.renderAscii(options, charset), b.renderAscii(options, charset), symbol.renderAscii(options, charset));
     }
 
     private static AsciiArt renderArt(AsciiArt a, AsciiArt b, AsciiArt symbol) {
@@ -54,12 +54,12 @@ final class SimpleInfixOperation implements Expression {
     }
 
     @Override
-    public String renderLatex() {
-        return a.renderLatex()+" "+symbol.renderLatex()+" "+b.renderLatex();
+    public String renderLatex(RenderOptions options) {
+        return a.renderLatex(options)+" "+symbol.renderLatex(options)+" "+b.renderLatex(options);
     }
 
     @Override
-    public Node renderMathMLNode() {
-        return Utils.join(a.renderMathMLNode(), symbol.renderMathMLNode(), b.renderMathMLNode());
+    public Node renderMathMLNode(RenderOptions options) {
+        return Utils.join(a.renderMathMLNode(options), symbol.renderMathMLNode(options), b.renderMathMLNode(options));
     }
 }

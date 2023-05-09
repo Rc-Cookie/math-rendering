@@ -4,11 +4,11 @@ import com.github.rccookie.primitive.int2;
 import com.github.rccookie.util.Arguments;
 import com.github.rccookie.xml.Node;
 
-final class Superscript implements Expression {
+final class Superscript implements RenderableExpression {
 
-    final Expression a, b;
+    final RenderableExpression a, b;
 
-    Superscript(Expression a, Expression b) {
+    Superscript(RenderableExpression a, RenderableExpression b) {
         this.a = Arguments.checkNull(a, "a");
         this.b = Arguments.checkNull(b, "b");
     }
@@ -19,8 +19,8 @@ final class Superscript implements Expression {
     }
 
     @Override
-    public String renderInline() {
-        String a = this.a.renderInline(), b = this.b.renderInline();
+    public String renderInline(RenderOptions options) {
+        String a = this.a.renderInline(options), b = this.b.renderInline(options);
         if(!Utils.isSuperscript(a)) {
             String superscript = Utils.toSuperscript(b);
             if(superscript != null) return a + superscript;
@@ -29,13 +29,13 @@ final class Superscript implements Expression {
     }
 
     @Override
-    public AsciiArt renderAscii() {
-        return renderArt(a.renderAscii(), b.renderAscii(), a instanceof Superscript || a instanceof SuperSubscript, null);
+    public AsciiArt renderAscii(RenderOptions options) {
+        return renderArt(a.renderAscii(options), b.renderAscii(options), a instanceof Superscript || a instanceof SuperSubscript, null);
     }
 
     @Override
-    public AsciiArt renderUnicode() {
-        AsciiArt a = this.a.renderUnicode(), b = this.b.renderUnicode();
+    public AsciiArt renderUnicode(RenderOptions options) {
+        AsciiArt a = this.a.renderUnicode(options), b = this.b.renderUnicode(options);
         if(b.height() == 1 && !Utils.isSuperscript(a.toString())) {
             String superscript = Utils.toSuperscript(b.getLine(0));
             if(superscript != null)
@@ -45,8 +45,8 @@ final class Superscript implements Expression {
     }
 
     @Override
-    public AsciiArt renderAscii(CharacterSet charset) {
-        AsciiArt a = this.a.renderAscii(charset), b = this.b.renderAscii(charset);
+    public AsciiArt renderAscii(RenderOptions options, CharacterSet charset) {
+        AsciiArt a = this.a.renderAscii(options, charset), b = this.b.renderAscii(options, charset);
         if(b.height() == 1 && !Utils.isSuperscript(a.toString())) {
             String superscript = Utils.toSuperscript(b.getLine(0));
             if(superscript != null && charset.canDisplay(superscript))
@@ -63,15 +63,15 @@ final class Superscript implements Expression {
     }
 
     @Override
-    public String renderLatex() {
-        return "{"+a.renderLatex()+"}^{"+b.renderLatex()+"}";
+    public String renderLatex(RenderOptions options) {
+        return "{"+a.renderLatex(options)+"}^{"+b.renderLatex(options)+"}";
     }
 
     @Override
-    public Node renderMathMLNode() {
+    public Node renderMathMLNode(RenderOptions options) {
         Node sup = new Node("msup");
-        sup.children.add(a.renderMathMLNode());
-        sup.children.add(b.renderMathMLNode());
+        sup.children.add(a.renderMathMLNode(options));
+        sup.children.add(b.renderMathMLNode(options));
         return sup;
     }
 }

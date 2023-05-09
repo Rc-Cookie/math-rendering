@@ -5,13 +5,13 @@ import java.util.function.Function;
 import com.github.rccookie.util.Arguments;
 import com.github.rccookie.xml.Node;
 
-final class SuperSubscript implements Expression {
+final class SuperSubscript implements RenderableExpression {
 
-    final Expression main;
-    final Expression sup;
-    final Expression sub;
+    final RenderableExpression main;
+    final RenderableExpression sup;
+    final RenderableExpression sub;
 
-    SuperSubscript(Expression main, Expression sup, Expression sub) {
+    SuperSubscript(RenderableExpression main, RenderableExpression sup, RenderableExpression sub) {
         this.main = Arguments.checkNull(main, "main");
         this.sup = Arguments.checkNull(sup, "sup");
         this.sub = Arguments.checkNull(sub, "sub");
@@ -23,40 +23,40 @@ final class SuperSubscript implements Expression {
     }
 
     @Override
-    public String renderInline() {
-        return new Superscript(new Subscript(main, sub), sup).renderInline();
+    public String renderInline(RenderOptions options) {
+        return new Superscript(new Subscript(main, sub), sup).renderInline(options);
     }
 
     @Override
-    public AsciiArt renderAscii() {
-        return renderArt(Expression::renderAscii);
+    public AsciiArt renderAscii(RenderOptions options) {
+        return renderArt(renderableExpression -> renderableExpression.renderAscii(options));
     }
 
     @Override
-    public AsciiArt renderUnicode() {
-        AsciiArt main = this.main.renderUnicode(), sup = this.sup.renderUnicode(), sub = this.sub.renderUnicode();
+    public AsciiArt renderUnicode(RenderOptions options) {
+        AsciiArt main = this.main.renderUnicode(options), sup = this.sup.renderUnicode(options), sub = this.sub.renderUnicode(options);
 
         if(sub.height() == 1 && !Utils.isSubscript(sub.toString())) {
             String subscript = Utils.toSubscript(sub.toString());
             if(subscript != null)
                 return Superscript.renderArt(main.appendBottom(new AsciiArt(subscript)), sup, this.main instanceof Superscript || this.main instanceof SuperSubscript, main.size());
         }
-        return renderArt(Expression::renderUnicode);
+        return renderArt(renderableExpression -> renderableExpression.renderUnicode(options));
     }
 
     @Override
-    public AsciiArt renderAscii(CharacterSet charset) {
-        AsciiArt main = this.main.renderAscii(charset), sup = this.sup.renderAscii(charset), sub = this.sub.renderAscii(charset);
+    public AsciiArt renderAscii(RenderOptions options, CharacterSet charset) {
+        AsciiArt main = this.main.renderAscii(options, charset), sup = this.sup.renderAscii(options, charset), sub = this.sub.renderAscii(options, charset);
 
         if(sub.height() == 1 && !Utils.isSubscript(sub.toString())) {
             String subscript = Utils.toSubscript(sub.toString());
             if(subscript != null && charset.canDisplay(subscript))
                 return Superscript.renderArt(main.appendBottom(new AsciiArt(subscript)), sup, this.main instanceof Superscript || this.main instanceof SuperSubscript, main.size());
         }
-        return renderArt(e -> e.renderAscii(charset));
+        return renderArt(e -> e.renderAscii(options, charset));
     }
 
-    private AsciiArt renderArt(Function<Expression, AsciiArt> renderer) {
+    private AsciiArt renderArt(Function<RenderableExpression, AsciiArt> renderer) {
         AsciiArt main = renderer.apply(this.main);
         return Subscript.renderArt(
                 Superscript.renderArt(main, renderer.apply(sup), this.main instanceof Superscript || this.main instanceof SuperSubscript, null),
@@ -72,16 +72,16 @@ final class SuperSubscript implements Expression {
     }
 
     @Override
-    public String renderLatex() {
-        return "{"+main.renderLatex()+"}^{"+sup.renderLatex()+"}_{"+sub.renderLatex()+"}";
+    public String renderLatex(RenderOptions options) {
+        return "{"+main.renderLatex(options)+"}^{"+sup.renderLatex(options)+"}_{"+sub.renderLatex(options)+"}";
     }
 
     @Override
-    public Node renderMathMLNode() {
+    public Node renderMathMLNode(RenderOptions options) {
         Node subSup = new Node("msubSup");
-        subSup.children.add(main.renderMathMLNode());
-        subSup.children.add(sub.renderMathMLNode());
-        subSup.children.add(sup.renderMathMLNode());
+        subSup.children.add(main.renderMathMLNode(options));
+        subSup.children.add(sub.renderMathMLNode(options));
+        subSup.children.add(sup.renderMathMLNode(options));
         return subSup;
     }
 }

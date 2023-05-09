@@ -4,12 +4,12 @@ import com.github.rccookie.primitive.int2;
 import com.github.rccookie.util.Arguments;
 import com.github.rccookie.xml.Node;
 
-final class Root implements Expression {
+final class Root implements RenderableExpression {
 
-    final Expression degree;
-    final Expression value;
+    final RenderableExpression degree;
+    final RenderableExpression value;
 
-    Root(Expression degree, Expression value) {
+    Root(RenderableExpression degree, RenderableExpression value) {
         this.degree = Arguments.checkNull(degree, "degree");
         this.value = Arguments.checkNull(value, "value");
     }
@@ -21,8 +21,8 @@ final class Root implements Expression {
 
 
     @Override
-    public String renderInline() {
-        String degree = this.degree.renderInline(), value = this.value.renderInline();
+    public String renderInline(RenderOptions options) {
+        String degree = this.degree.renderInline(options), value = this.value.renderInline(options);
         if(degree.isEmpty() || degree.equals("2"))
             return "\u221A" + Utils.encapsulate(value);
         String supDeg = Utils.toSuperscript(degree);
@@ -32,18 +32,18 @@ final class Root implements Expression {
     }
 
     @Override
-    public AsciiArt renderAscii() {
-        return renderArt(degree.renderAscii(), value.renderAscii(), '\\', '/', '|');
+    public AsciiArt renderAscii(RenderOptions options) {
+        return renderArt(degree.renderAscii(options), value.renderAscii(options), '\\', '/', '|');
     }
 
     @Override
-    public AsciiArt renderUnicode() {
-        return renderArt(degree.renderUnicode(), value.renderUnicode(), '\u2572', '\u2571', '\u2502');
+    public AsciiArt renderUnicode(RenderOptions options) {
+        return renderArt(degree.renderUnicode(options), value.renderUnicode(options), '\u2572', '\u2571', '\u2502');
     }
 
     @Override
-    public AsciiArt renderAscii(CharacterSet charset) {
-        return renderArt(degree.renderAscii(charset), value.renderAscii(charset), charset.orFallback('\u2572', '\\'), charset.orFallback('\u2571', '/'), charset.orFallback('\u2502', '|'));
+    public AsciiArt renderAscii(RenderOptions options, CharacterSet charset) {
+        return renderArt(degree.renderAscii(options, charset), value.renderAscii(options, charset), charset.orFallback('\u2572', '\\'), charset.orFallback('\u2571', '/'), charset.orFallback('\u2502', '|'));
     }
 
     private static AsciiArt renderArt(AsciiArt degree, AsciiArt value, char leftDiag, char rightDiag, char vert) {
@@ -74,13 +74,13 @@ final class Root implements Expression {
     }
 
     @Override
-    public String renderLatex() {
-        return "\\sqrt["+degree.renderLatex()+"]{"+value.renderLatex()+"}";
+    public String renderLatex(RenderOptions options) {
+        return "\\sqrt["+degree.renderLatex(options)+"]{"+value.renderLatex(options)+"}";
     }
 
     @Override
-    public Node renderMathMLNode() {
-        Node degree = this.degree.renderMathMLNode();
+    public Node renderMathMLNode(RenderOptions options) {
+        Node degree = this.degree.renderMathMLNode(options);
         Node root;
         if(degree.text().isEmpty())
             root = new Node("msqrt");
@@ -88,7 +88,7 @@ final class Root implements Expression {
             root = new Node("mroot");
             root.children.add(degree);
         }
-        root.children.add(0, value.renderMathMLNode());
+        root.children.add(0, value.renderMathMLNode(options));
         return root;
     }
 }

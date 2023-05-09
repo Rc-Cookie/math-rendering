@@ -7,14 +7,14 @@ import com.github.rccookie.primitive.int2;
 import com.github.rccookie.util.Arguments;
 import com.github.rccookie.xml.Node;
 
-final class Grid implements Expression {
+final class Grid implements RenderableExpression {
 
-    final Expression[][] elements;
+    final RenderableExpression[][] elements;
 
-    Grid(Expression[][] elements) {
+    Grid(RenderableExpression[][] elements) {
         if(elements.length == 0 || elements[0].length == 0)
             throw new IllegalArgumentException("At least one element required");
-        this.elements = new Expression[Arguments.checkNull(elements, "elements").length][];
+        this.elements = new RenderableExpression[Arguments.checkNull(elements, "elements").length][];
         for(int i=0; i<elements.length; i++) {
             if(elements[i].length != elements[0].length)
                 throw new IllegalArgumentException("Rows must be of the same size");
@@ -28,7 +28,7 @@ final class Grid implements Expression {
     }
 
     @Override
-    public String renderInline() {
+    public String renderInline(RenderOptions options) {
         StringBuilder str = new StringBuilder();
         for(int i=0; i<elements.length; i++) {
             if(i != 0) str.append(",");
@@ -36,7 +36,7 @@ final class Grid implements Expression {
                 str.append("[");
             for(int j=0; j<elements[i].length; j++) {
                 if(j != 0) str.append(" ");
-                str.append(elements[i][j].renderInline());
+                str.append(elements[i][j].renderInline(options));
             }
             if(elements[i].length != 1)
                 str.append("]");
@@ -45,21 +45,21 @@ final class Grid implements Expression {
     }
 
     @Override
-    public AsciiArt renderAscii() {
-        return renderGrid(Expression::renderAscii);
+    public AsciiArt renderAscii(RenderOptions options) {
+        return renderGrid(renderableExpression -> renderableExpression.renderAscii(options));
     }
 
     @Override
-    public AsciiArt renderUnicode() {
-        return renderGrid(Expression::renderUnicode);
+    public AsciiArt renderUnicode(RenderOptions options) {
+        return renderGrid(renderableExpression -> renderableExpression.renderUnicode(options));
     }
 
     @Override
-    public AsciiArt renderAscii(CharacterSet charset) {
-        return renderGrid(e -> e.renderAscii(charset));
+    public AsciiArt renderAscii(RenderOptions options, CharacterSet charset) {
+        return renderGrid(e -> e.renderAscii(options, charset));
     }
 
-    private AsciiArt renderGrid(Function<Expression, AsciiArt> elementRenderer) {
+    private AsciiArt renderGrid(Function<RenderableExpression, AsciiArt> elementRenderer) {
         AsciiArt[][] elements = new AsciiArt[this.elements.length][this.elements[0].length];
         int[] widths = new int[elements[0].length], heights = new int[elements.length];
         for(int i=0; i<elements.length; i++) for(int j=0; j<elements[i].length; j++) {
@@ -78,12 +78,12 @@ final class Grid implements Expression {
     }
 
     @Override
-    public String renderLatex() {
+    public String renderLatex(RenderOptions options) {
         StringBuilder str = new StringBuilder("\\begin{matrix}");
         for(int i=0; i<elements.length; i++) {
             for(int j=0; j<elements[i].length; j++) {
                 if(j != 0) str.append("&");
-                str.append(elements[i][j].renderLatex());
+                str.append(elements[i][j].renderLatex(options));
             }
             if(i != elements.length-1)
                 str.append("\\\\");
@@ -92,13 +92,13 @@ final class Grid implements Expression {
     }
 
     @Override
-    public Node renderMathMLNode() {
+    public Node renderMathMLNode(RenderOptions options) {
         Node table = new Node("mtable");
-        for(Expression[] row : elements) {
+        for(RenderableExpression[] row : elements) {
             Node tr = new Node("mtr");
-            for(Expression e : row) {
+            for(RenderableExpression e : row) {
                 Node td = new Node("mtd");
-                td.children.add(e.renderMathMLNode());
+                td.children.add(e.renderMathMLNode(options));
                 tr.children.add(td);
             }
             table.children.add(tr);

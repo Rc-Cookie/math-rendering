@@ -3,7 +3,7 @@ package com.github.rccookie.math.rendering;
 import com.github.rccookie.util.Arguments;
 import com.github.rccookie.xml.Node;
 
-final class Text implements Expression {
+final class Text implements RenderableExpression {
 
     private final String text;
 
@@ -17,32 +17,32 @@ final class Text implements Expression {
     }
 
     @Override
-    public String renderInline() {
+    public String renderInline(RenderOptions options) {
         return text.replace('\n', ' ');
     }
 
     @Override
-    public AsciiArt renderAscii() {
+    public AsciiArt renderAscii(RenderOptions options) {
         return new AsciiArt(text);
     }
 
     @Override
-    public AsciiArt renderUnicode() {
+    public AsciiArt renderUnicode(RenderOptions options) {
         return new AsciiArt(text);
     }
 
     @Override
-    public AsciiArt renderAscii(CharacterSet charset) {
+    public AsciiArt renderAscii(RenderOptions options, CharacterSet charset) {
         return new AsciiArt(text);
     }
 
     @Override
-    public String renderLatex() {
+    public String renderLatex(RenderOptions options) {
         return "\\text{"+ text +"}";
     }
 
     @Override
-    public Node renderMathMLNode() {
+    public Node renderMathMLNode(RenderOptions options) {
         Node s = new Node("ms");
         s.children.add(new com.github.rccookie.xml.Text(text));
         return s;
