@@ -6,17 +6,17 @@ A small library for rendering expressions into different formats. Currently supp
  - Ascii art
  - Unicode ascii art
  - Latex source code
+ - MathML
 
 Additionally, options to render to these formats is planned:
 
- - MathML
  - Rendering as an image
 
 The library does not support parsing math expressions from LaTeX or similar, it is mainly intended for displaying math which is already given in "program format".
 
 ### Example output
 
-`def(value("A"), matrix(2, 2, not(par(and(value(1), value(0)))), frac(pi(),value(2)), call("exp", value(2), value(3)), neg(factorial(value(4)))))`
+`def(name("A"), matrix(2, 2, not(par(and(num(1), num(0)))), frac(pi(),num(2)), call("exp", num(2), num(3)), neg(factorial(num(4)))))`
 
 Unicode ascii art:
 ```
@@ -26,7 +26,7 @@ A := ⎢          2 ⎥
      ⎣exp(2,3) -4!⎦
 ```
 
-`set(eq(sum(eq(value("k"), value(0)), inf(), frac(value(1), pow(value("q"), value("k")))), frac(value(1), minus(value(1), value("k")))), nIn(value("q"), par(list(value(0), value(1)))))`
+`set(eq(sum(eq(name("k"), num(0)), inf(), frac(num(1), pow(name("q"), num("k")))), frac(num(1), minus(num(1), name("k")))), nIn(name("q"), par(list(num(0), num(1)))))`
 
 Ascii art:
 ```
