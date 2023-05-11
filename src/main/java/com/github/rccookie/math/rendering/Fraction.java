@@ -26,24 +26,33 @@ final class Fraction implements RenderableExpression {
 
     @Override
     public AsciiArt renderAscii(RenderOptions options) {
-        return renderFraction(a.renderAscii(options), b.renderAscii(options));
+        return renderFraction(a.renderAscii(options), b.renderAscii(options), options);
     }
 
     @Override
     public AsciiArt renderUnicode(RenderOptions options) {
-        return renderFraction(a.renderUnicode(options), b.renderUnicode(options));
+        return renderFraction(a.renderUnicode(options), b.renderUnicode(options), options);
     }
 
     @Override
     public AsciiArt renderAscii(RenderOptions options, CharacterSet charset) {
-        return renderFraction(a.renderAscii(options, charset), b.renderAscii(options, charset));
+        return renderFraction(a.renderAscii(options, charset), b.renderAscii(options, charset), options);
     }
 
-    private static AsciiArt renderFraction(AsciiArt a, AsciiArt b) {
+    private static AsciiArt renderFraction(AsciiArt a, AsciiArt b, RenderOptions options) {
+        if(shouldRenderInline(a, b, options))
+            return a.appendCenter(new AsciiArt("/")).appendCenter(b);
+
         AsciiArt bar = new AsciiArt("-".repeat(Math.max(a.width(), b.width()) + (a.height() + b.height() > 2 ? 2 : 0)));
         int aPos = (bar.width() - a.width() + 1) / 2;
         int bPos = (bar.width() - b.width() + 1) / 2;
         return bar.draw(b, new int2(bPos, 1)).draw(a, new int2(aPos, -a.height()));
+    }
+
+    private static boolean shouldRenderInline(AsciiArt a, AsciiArt b, RenderOptions options) {
+        return a.height() == 1 && b.height() == 1 &&
+                a.width() < options.smallFractionsSizeLimit && b.width() < options.smallFractionsSizeLimit &&
+                Utils.oneNumOrVar(a.toString()) && Utils.oneNumOrVar(b.toString());
     }
 
     @Override

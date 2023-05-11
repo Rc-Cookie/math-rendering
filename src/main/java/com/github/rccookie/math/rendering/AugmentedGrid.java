@@ -54,12 +54,14 @@ final class AugmentedGrid implements RenderableExpression {
     }
 
     private AsciiArt renderGrid(Function<RenderableExpression, AsciiArt> elementRenderer, char vert) {
-        AsciiArt[][] elements = new AsciiArt[a.elements.length][a.elements[0].length + b.elements[0].length];
+        int aLen = a.elements[0].length;
+
+        AsciiArt[][] elements = new AsciiArt[a.elements.length][aLen + b.elements[0].length];
         for(int i=0; i<elements.length; i++) {
-            for(int j=0; j<a.elements[i].length; j++)
+            for(int j=0; j<aLen; j++)
                 elements[i][j] = elementRenderer.apply(a.elements[i][j]);
             for(int j=0; j<b.elements[i].length; j++)
-                elements[i][j+a.elements[i].length] = elementRenderer.apply(b.elements[i][j]);
+                elements[i][j+aLen] = elementRenderer.apply(b.elements[i][j]);
         }
 
         int[] widths = new int[elements[0].length], heights = new int[elements.length];
@@ -73,13 +75,17 @@ final class AugmentedGrid implements RenderableExpression {
 
         for(int i=0, yOff=0; i<elements.length; yOff+=heights[i], i++) {
             int xOff = 0;
-            for(int j=0; j<a.elements[i].length; xOff+=widths[j]+1, j++) {
-                art = art.draw(elements[i][j], new int2(xOff + (widths[j]-elements[i][j].width()+1)/2, yOff + (heights[i]-elements[i][j].height()+1)/2));
+            for(int j=0; j<aLen; xOff+=widths[j]+1, j++) {
+                int w = widths[j], h = heights[i];
+                AsciiArt e = elements[i][j];
+                art = art.draw(e, new int2(xOff + (w - e.width() + 1) / 2, yOff + (h - e.height() + 1) / 2));
             }
             art = art.draw(i == elements.length-1 ? new AsciiArt("|") : bar, new int2(xOff, yOff));
-            xOff++;
-            for(int j=0; j<b.elements[i].length; xOff+=widths[j+a.elements[i].length]+1, j++) {
-                art = art.draw(elements[i][j], new int2(xOff + (widths[j+a.elements[i].length]-elements[i][j].width()+1)/2, yOff + (heights[i]-elements[i][j].height()+1)/2));
+            xOff += 2;
+            for(int j=0; j<b.elements[i].length; xOff+=widths[j+aLen]+1, j++) {
+                int w = widths[j+aLen], h = heights[i];
+                AsciiArt e = elements[i][j+aLen];
+                art = art.draw(e, new int2(xOff + (w - e.width() + 1) / 2, yOff + (h - e.height() + 1) / 2));
             }
         }
 

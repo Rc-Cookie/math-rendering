@@ -5,9 +5,7 @@ import java.math.BigInteger;
 import java.util.Objects;
 
 import com.github.rccookie.util.Arguments;
-import com.github.rccookie.util.Console;
 import com.github.rccookie.xml.Node;
-import com.github.rccookie.xml.XML;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -320,6 +318,10 @@ public interface RenderableExpression {
         return brackets(Bracket.FLOOR, inner);
     }
 
+    static RenderableExpression abs(RenderableExpression inner) {
+        return brackets(Bracket.ABS, inner);
+    }
+
     static RenderableExpression brackets(Bracket type, RenderableExpression inner) {
         return new Brackets(type, inner);
     }
@@ -621,6 +623,10 @@ public interface RenderableExpression {
         return new Subscript(a,b);
     }
 
+    static RenderableExpression exp(RenderableExpression value) {
+        return new Exp(value);
+    }
+
     static RenderableExpression sqrt(RenderableExpression value) {
         return root(num(""), value);
     }
@@ -674,33 +680,6 @@ public interface RenderableExpression {
     }
 
 
-    static void main(String[] args) {
-        RenderableExpression[] es = {
-                def(name("A"), matrix(2, 2, not(par(and(num(1), num(0)))), frac(pi(), num(2)), call("exp", num(2), num(3)), neg(factorial(num(4))))),
-                root(num(123456), augMatrix(grid(3,3, num(1), num(2), num(3), num(4), num(5), num(6), num(7), num(8), num(10)), column(num(10), num(20), num(30)))),
-                set(eq(sum(eq(name("k"), num(0)), inf(), frac(num(1), pow(name("q"), name("k")))), frac(num(1), minus(num(1), name("k")))), nIn(name("q"), par(list(num(0), num(1))))),
-                integral(num(2), num(5), pow(name("x"), num(2)), "x"),
-                eq(lim("x", inf(), frac(num(1), name("x"))), num(0)),
-                plus(num(123456789.123456789), num(2,10)),
-        };
-        RenderOptions options = RenderOptions.DEFAULT;
-        for(RenderableExpression e : es) {
-            Console.split();
-            Console.log(e);
-            Console.split("Inline");
-            Console.log(e.renderInline(options));
-            Console.split("Unicode");
-            Console.log(e.renderUnicode(options));
-            Console.split("Ascii");
-            Console.log(e.renderAscii(options));
-            Console.split("Latex");
-            Console.log(e.renderLatex(options));
-            Console.split("MathML");
-            System.out.println(e.renderMathML(options, false).toHTML(XML.HTML & ~XML.FORMATTED));
-        }
-    }
-
-
 
     final class RenderOptions {
 
@@ -709,11 +688,17 @@ public interface RenderableExpression {
         public final int precision;
         public final DecimalMode decimalMode;
         public final boolean scientific;
+        public final int smallFractionsSizeLimit;
 
         public RenderOptions(int precision, DecimalMode decimalMode, boolean scientific) {
+            this(precision, decimalMode, scientific, 4);
+        }
+
+        public RenderOptions(int precision, DecimalMode decimalMode, boolean scientific, int smallFractionsSizeLimit) {
             this.precision = precision;
             this.decimalMode = Arguments.checkNull(decimalMode, "decimalMode");
             this.scientific = scientific;
+            this.smallFractionsSizeLimit = smallFractionsSizeLimit;
         }
 
         @Override
@@ -722,6 +707,7 @@ public interface RenderableExpression {
                     "precision=" + precision +
                     ", decimalMode=" + decimalMode +
                     ", scientific=" + scientific +
+                    ", smallFractions=" + smallFractionsSizeLimit +
                     '}';
         }
 
@@ -739,15 +725,19 @@ public interface RenderableExpression {
         }
 
         public RenderOptions setPrecision(int precision) {
-            return new RenderOptions(precision, decimalMode, scientific);
+            return new RenderOptions(Arguments.checkRange(precision, 1, null), decimalMode, scientific, smallFractionsSizeLimit);
         }
 
         public RenderOptions setDecimalMode(DecimalMode decimalMode) {
-            return new RenderOptions(precision, decimalMode, scientific);
+            return new RenderOptions(precision, Arguments.checkNull(decimalMode, "decimalMode"), scientific, smallFractionsSizeLimit);
         }
 
         public RenderOptions setScientific(boolean scientific) {
-            return new RenderOptions(precision, decimalMode, scientific);
+            return new RenderOptions(precision, decimalMode, scientific, smallFractionsSizeLimit);
+        }
+
+        public RenderOptions setSmallFractionsSizeLimit(int smallFractionsSizeLimit) {
+            return new RenderOptions(precision, decimalMode, scientific, Arguments.checkRange(smallFractionsSizeLimit, 0, null));
         }
 
         public enum DecimalMode {
