@@ -1,7 +1,5 @@
 package com.github.rccookie.math.rendering;
 
-import java.util.function.Function;
-
 import com.github.rccookie.primitive.int2;
 import com.github.rccookie.util.Arguments;
 import com.github.rccookie.xml.Node;
@@ -44,33 +42,18 @@ final class BigSymbol implements RenderableExpression {
     }
 
     @Override
-    public AsciiArt renderAscii(RenderOptions options) {
-        return renderArt(renderableExpression -> renderableExpression.renderAscii(options));
-    }
-
-    @Override
-    public AsciiArt renderUnicode(RenderOptions options) {
-        return renderArt(renderableExpression -> renderableExpression.renderUnicode(options));
-    }
-
-    @Override
-    public AsciiArt renderAscii(RenderOptions options, CharacterSet charset) {
-        return renderArt(e -> e.renderAscii(options, charset));
-    }
-
-    private AsciiArt renderArt(Function<RenderableExpression, AsciiArt> renderer) {
-        AsciiArt symbol = renderer.apply(this.symbol);
+    public AsciiArt renderAsciiArt(RenderOptions options) {
+        AsciiArt symbol = this.symbol.renderAsciiArt(options);
         AsciiArt art = symbol;
         if(this.sub != null) {
-            AsciiArt sub = renderer.apply(this.sub);
+            AsciiArt sub = this.sub.renderAsciiArt(options);
             art = art.draw(sub, new int2((symbol.width() - sub.width()) / 2, art.height()));
         }
         if(this.sup != null) {
-            AsciiArt sup = renderer.apply(this.sup);
+            AsciiArt sup = this.sup.renderAsciiArt(options);
             art = art.draw(sup, new int2((symbol.width() - sup.width() + 1) / 2, -sup.height()));
         }
-        AsciiArt value = renderer.apply(this.value);
-        return art.appendTop(new AsciiArt(" ")).appendCenter(value);
+        return art.appendTop(new AsciiArt(" ")).appendCenter(this.value.renderAsciiArt(options));
     }
 
     @Override

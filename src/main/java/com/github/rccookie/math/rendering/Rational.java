@@ -71,18 +71,8 @@ final class Rational implements RenderableExpression {
     }
 
     @Override
-    public AsciiArt renderAscii(RenderOptions options) {
-        return render(RenderableExpression::renderAscii, options);
-    }
-
-    @Override
-    public AsciiArt renderUnicode(RenderOptions options) {
-        return render(RenderableExpression::renderUnicode, options);
-    }
-
-    @Override
-    public AsciiArt renderAscii(RenderOptions options, CharacterSet charset) {
-        return render((e,o) -> e.renderAscii(o, charset), options);
+    public AsciiArt renderAsciiArt(RenderOptions options) {
+        return render(RenderableExpression::renderAsciiArt, options);
     }
 
     @Override

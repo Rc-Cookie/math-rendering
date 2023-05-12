@@ -32,21 +32,12 @@ final class Root implements RenderableExpression {
     }
 
     @Override
-    public AsciiArt renderAscii(RenderOptions options) {
-        return renderArt(degree.renderAscii(options), value.renderAscii(options), '\\', '/', '|');
-    }
+    public AsciiArt renderAsciiArt(RenderOptions options) {
+        String leftDiag = options.charset.orFallback("\u2572", "\\");
+        String rightDiag = options.charset.orFallback("\u2571", "/");
+        String vert = options.charset.orFallback("\u2502", "|");
+        AsciiArt degree = this.degree.renderAsciiArt(options), value = this.value.renderAsciiArt(options);
 
-    @Override
-    public AsciiArt renderUnicode(RenderOptions options) {
-        return renderArt(degree.renderUnicode(options), value.renderUnicode(options), '\u2572', '\u2571', '\u2502');
-    }
-
-    @Override
-    public AsciiArt renderAscii(RenderOptions options, CharacterSet charset) {
-        return renderArt(degree.renderAscii(options, charset), value.renderAscii(options, charset), charset.orFallback('\u2572', '\\'), charset.orFallback('\u2571', '/'), charset.orFallback('\u2502', '|'));
-    }
-
-    private static AsciiArt renderArt(AsciiArt degree, AsciiArt value, char leftDiag, char rightDiag, char vert) {
         AsciiArt shape = createRootShape(value.height(), leftDiag, rightDiag);
         AsciiArt root = shape.appendTop(value);
         if(shape.height() >= 3)
@@ -59,7 +50,7 @@ final class Root implements RenderableExpression {
         return root.draw(degree, pos);
     }
 
-    private static AsciiArt createRootShape(int height, char leftDiag, char rightDiag) {
+    private static AsciiArt createRootShape(int height, String leftDiag, String rightDiag) {
         if(height <= 1) return new AsciiArt("\\"+rightDiag);
         int barHeight = barHeight(height);
         int minBarI = height - barHeight;

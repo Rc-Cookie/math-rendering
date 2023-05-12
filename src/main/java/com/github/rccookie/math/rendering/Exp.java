@@ -17,18 +17,8 @@ final class Exp implements RenderableExpression {
     }
 
     @Override
-    public AsciiArt renderAscii(RenderOptions options) {
-        return asPower().renderAscii(options);
-    }
-
-    @Override
-    public AsciiArt renderUnicode(RenderOptions options) {
-        return asPower().renderUnicode(options);
-    }
-
-    @Override
-    public AsciiArt renderAscii(RenderOptions options, CharacterSet charset) {
-        return asPower().renderAscii(options, charset);
+    public AsciiArt renderAsciiArt(RenderOptions options) {
+        return asPower().renderAsciiArt(options);
     }
 
     @Override

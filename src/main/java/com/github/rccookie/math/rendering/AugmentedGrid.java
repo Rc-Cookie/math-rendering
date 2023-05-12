@@ -1,7 +1,5 @@
 package com.github.rccookie.math.rendering;
 
-import java.util.function.Function;
-
 import com.github.rccookie.primitive.int2;
 import com.github.rccookie.util.Arguments;
 import com.github.rccookie.xml.Node;
@@ -39,29 +37,16 @@ final class AugmentedGrid implements RenderableExpression {
     }
 
     @Override
-    public AsciiArt renderAscii(RenderOptions options) {
-        return renderGrid(renderableExpression -> renderableExpression.renderAscii(options), '|');
-    }
-
-    @Override
-    public AsciiArt renderUnicode(RenderOptions options) {
-        return renderGrid(renderableExpression -> renderableExpression.renderUnicode(options), '\u2502');
-    }
-
-    @Override
-    public AsciiArt renderAscii(RenderOptions options, CharacterSet charset) {
-        return renderGrid(e -> e.renderAscii(options, charset), charset.orFallback('\u2502', '|'));
-    }
-
-    private AsciiArt renderGrid(Function<RenderableExpression, AsciiArt> elementRenderer, char vert) {
+    public AsciiArt renderAsciiArt(RenderOptions options) {
+        char vert = options.charset.orFallback('\u2502', '|');
         int aLen = a.elements[0].length;
 
         AsciiArt[][] elements = new AsciiArt[a.elements.length][aLen + b.elements[0].length];
         for(int i=0; i<elements.length; i++) {
             for(int j=0; j<aLen; j++)
-                elements[i][j] = elementRenderer.apply(a.elements[i][j]);
+                elements[i][j] = a.elements[i][j].renderAsciiArt(options);
             for(int j=0; j<b.elements[i].length; j++)
-                elements[i][j+aLen] = elementRenderer.apply(b.elements[i][j]);
+                elements[i][j+aLen] = b.elements[i][j].renderAsciiArt(options);
         }
 
         int[] widths = new int[elements[0].length], heights = new int[elements.length];

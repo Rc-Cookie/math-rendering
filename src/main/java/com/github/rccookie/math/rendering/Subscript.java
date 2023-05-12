@@ -29,27 +29,11 @@ final class Subscript implements RenderableExpression {
     }
 
     @Override
-    public AsciiArt renderAscii(RenderOptions options) {
-        return renderArt(a.renderAscii(options), b.renderAscii(options), a instanceof Subscript || a instanceof SuperSubscript, null);
-    }
-
-    @Override
-    public AsciiArt renderUnicode(RenderOptions options) {
-        AsciiArt a = this.a.renderUnicode(options), b = this.b.renderUnicode(options);
+    public AsciiArt renderAsciiArt(RenderOptions options) {
+        AsciiArt a = this.a.renderAsciiArt(options), b = this.b.renderAsciiArt(options);
         if(b.height() == 1 && !Utils.isSubscript(a.toString())) {
             String subscript = Utils.toSubscript(b.getLine(0));
-            if(subscript != null)
-                return a.appendBottom(new AsciiArt(subscript));
-        }
-        return renderArt(a,b, this.a instanceof Subscript || this.a instanceof SuperSubscript, null);
-    }
-
-    @Override
-    public AsciiArt renderAscii(RenderOptions options, CharacterSet charset) {
-        AsciiArt a = this.a.renderAscii(options, charset), b = this.b.renderAscii(options, charset);
-        if(b.height() == 1 && !Utils.isSubscript(a.toString())) {
-            String subscript = Utils.toSubscript(b.getLine(0));
-            if(subscript != null && charset.canDisplay(subscript))
+            if(subscript != null && options.charset.canDisplay(subscript))
                 return a.appendBottom(new AsciiArt(subscript));
         }
         return renderArt(a,b, this.a instanceof Subscript || this.a instanceof SuperSubscript, null);

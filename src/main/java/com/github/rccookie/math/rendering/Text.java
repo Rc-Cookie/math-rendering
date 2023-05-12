@@ -22,17 +22,7 @@ final class Text implements RenderableExpression {
     }
 
     @Override
-    public AsciiArt renderAscii(RenderOptions options) {
-        return new AsciiArt(text);
-    }
-
-    @Override
-    public AsciiArt renderUnicode(RenderOptions options) {
-        return new AsciiArt(text);
-    }
-
-    @Override
-    public AsciiArt renderAscii(RenderOptions options, CharacterSet charset) {
+    public AsciiArt renderAsciiArt(RenderOptions options) {
         return new AsciiArt(text);
     }
 

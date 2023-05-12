@@ -24,21 +24,10 @@ final class Middle implements RenderableExpression {
     }
 
     @Override
-    public AsciiArt renderAscii(RenderOptions options) {
-        return renderArt(a.renderAscii(options), b.renderAscii(options), "|");
-    }
+    public AsciiArt renderAsciiArt(RenderOptions options) {
+        String bar = options.charset.orFallback("|", "\u2502");
+        AsciiArt a = this.a.renderAsciiArt(options), b = this.b.renderAsciiArt(options);
 
-    @Override
-    public AsciiArt renderUnicode(RenderOptions options) {
-        return renderArt(a.renderUnicode(options), b.renderUnicode(options), "\u2502");
-    }
-
-    @Override
-    public AsciiArt renderAscii(RenderOptions options, CharacterSet charset) {
-        return renderArt(a.renderAscii(options, charset), b.renderAscii(options, charset), charset.orFallback("|", "\u2502"));
-    }
-
-    private static AsciiArt renderArt(AsciiArt a, AsciiArt b, String bar) {
         int height = Math.max(a.center(), b.center()), depth = Math.max(a.height()-a.center(), b.height()-b.center());
         int totalHeight = height + depth;
         AsciiArt barArt = new AsciiArt(totalHeight, i -> i==totalHeight-1 ? " | " : " "+bar+" ").setCenter(height);

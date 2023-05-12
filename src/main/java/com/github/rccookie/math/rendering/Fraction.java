@@ -25,18 +25,8 @@ final class Fraction implements RenderableExpression {
     }
 
     @Override
-    public AsciiArt renderAscii(RenderOptions options) {
-        return renderFraction(a.renderAscii(options), b.renderAscii(options), options);
-    }
-
-    @Override
-    public AsciiArt renderUnicode(RenderOptions options) {
-        return renderFraction(a.renderUnicode(options), b.renderUnicode(options), options);
-    }
-
-    @Override
-    public AsciiArt renderAscii(RenderOptions options, CharacterSet charset) {
-        return renderFraction(a.renderAscii(options, charset), b.renderAscii(options, charset), options);
+    public AsciiArt renderAsciiArt(RenderOptions options) {
+        return renderFraction(a.renderAsciiArt(options), b.renderAsciiArt(options), options);
     }
 
     private static AsciiArt renderFraction(AsciiArt a, AsciiArt b, RenderOptions options) {

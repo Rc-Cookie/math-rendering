@@ -17,16 +17,13 @@ public interface RenderableExpression {
 
     String renderInline(RenderOptions options);
 
-    AsciiArt renderAscii(RenderOptions options);
-
-    AsciiArt renderUnicode(RenderOptions options);
-
-    AsciiArt renderAscii(RenderOptions options, CharacterSet charset);
+    AsciiArt renderAsciiArt(RenderOptions options);
 
     String renderLatex(RenderOptions options);
 
     Node renderMathMLNode(RenderOptions options);
 
+    @SuppressWarnings("SpellCheckingInspection")
     default Node renderMathML(RenderOptions options, boolean inline) {
         Node math = new Node("math");
         math.attributes.put("displaystyle", !inline+"");
@@ -334,6 +331,10 @@ public interface RenderableExpression {
         return new BracketLiteral(type, false, inner);
     }
 
+    static RenderableExpression matrixBrackets(RenderableExpression inner) {
+        return new MatrixBrackets(inner);
+    }
+
     // ---------------------------------------------------
 
     static RenderableExpression frac(RenderableExpression numerator, RenderableExpression denominator) {
@@ -381,20 +382,16 @@ public interface RenderableExpression {
     }
 
     static RenderableExpression matrix(int m, int n, RenderableExpression... elementsRowByRow) {
-        return matrix(DEFAULT_MATRIX_BRACKET, m, n, elementsRowByRow);
+        return matrixBrackets(grid(m, n, elementsRowByRow));
     }
 
     static RenderableExpression matrix(Bracket bracketType, int m, int n, RenderableExpression... elementsRowByRow) {
-        if(m < 0 || m*n != Arguments.checkNull(elementsRowByRow, "elementsRowByRow").length)
-            throw new IllegalArgumentException("Incorrect number of elements for "+m+"+x"+n+" matrix");
-        RenderableExpression[][] elements = new RenderableExpression[m][n];
-        for(int i=0; i<m; i++)
-            System.arraycopy(elementsRowByRow, i*n, elements[i], 0, n);
-        return matrix(bracketType, elements);
+        RenderableExpression grid = grid(m, n, elementsRowByRow);
+        return bracketType != null ? brackets(bracketType, grid) : grid;
     }
 
     static RenderableExpression matrix(RenderableExpression[]... rows) {
-        return matrix(DEFAULT_MATRIX_BRACKET, rows);
+        return matrixBrackets(grid(rows));
     }
 
     static RenderableExpression matrix(Bracket bracketType, RenderableExpression[]... rows) {
@@ -683,22 +680,26 @@ public interface RenderableExpression {
 
     final class RenderOptions {
 
-        public static RenderOptions DEFAULT = new RenderOptions(50, DecimalMode.SMART, true);
+        public static RenderOptions DEFAULT = new RenderOptions(40, DecimalMode.SMART, true);
 
         public final int precision;
         public final DecimalMode decimalMode;
         public final boolean scientific;
         public final int smallFractionsSizeLimit;
+        public final Bracket matrixBrackets;
+        public final CharacterSet charset;
 
         public RenderOptions(int precision, DecimalMode decimalMode, boolean scientific) {
-            this(precision, decimalMode, scientific, 4);
+            this(precision, decimalMode, scientific, 4, Bracket.SQUARE, CharacterSet.UNICODE);
         }
 
-        public RenderOptions(int precision, DecimalMode decimalMode, boolean scientific, int smallFractionsSizeLimit) {
-            this.precision = precision;
+        public RenderOptions(int precision, DecimalMode decimalMode, boolean scientific, int smallFractionsSizeLimit, Bracket matrixBrackets, CharacterSet charset) {
+            this.precision = Arguments.checkRange(precision, 1, null);
             this.decimalMode = Arguments.checkNull(decimalMode, "decimalMode");
             this.scientific = scientific;
-            this.smallFractionsSizeLimit = smallFractionsSizeLimit;
+            this.smallFractionsSizeLimit = Arguments.checkRange(smallFractionsSizeLimit, 0, null);
+            this.matrixBrackets = Arguments.checkNull(matrixBrackets, "matrixBrackets");
+            this.charset = Arguments.checkNull(charset, "charset");
         }
 
         @Override
@@ -707,7 +708,9 @@ public interface RenderableExpression {
                     "precision=" + precision +
                     ", decimalMode=" + decimalMode +
                     ", scientific=" + scientific +
-                    ", smallFractions=" + smallFractionsSizeLimit +
+                    ", smallFractionsSizeLimit=" + smallFractionsSizeLimit +
+                    ", matrixBrackets=" + matrixBrackets +
+                    ", charset=" + charset +
                     '}';
         }
 
@@ -725,19 +728,27 @@ public interface RenderableExpression {
         }
 
         public RenderOptions setPrecision(int precision) {
-            return new RenderOptions(Arguments.checkRange(precision, 1, null), decimalMode, scientific, smallFractionsSizeLimit);
+            return new RenderOptions(precision, decimalMode, scientific, smallFractionsSizeLimit, matrixBrackets, charset);
         }
 
         public RenderOptions setDecimalMode(DecimalMode decimalMode) {
-            return new RenderOptions(precision, Arguments.checkNull(decimalMode, "decimalMode"), scientific, smallFractionsSizeLimit);
+            return new RenderOptions(precision, decimalMode, scientific, smallFractionsSizeLimit, matrixBrackets, charset);
         }
 
         public RenderOptions setScientific(boolean scientific) {
-            return new RenderOptions(precision, decimalMode, scientific, smallFractionsSizeLimit);
+            return new RenderOptions(precision, decimalMode, scientific, smallFractionsSizeLimit, matrixBrackets, charset);
         }
 
         public RenderOptions setSmallFractionsSizeLimit(int smallFractionsSizeLimit) {
-            return new RenderOptions(precision, decimalMode, scientific, Arguments.checkRange(smallFractionsSizeLimit, 0, null));
+            return new RenderOptions(precision, decimalMode, scientific, smallFractionsSizeLimit, matrixBrackets, charset);
+        }
+
+        public RenderOptions setMatrixBrackets(Bracket matrixBrackets) {
+            return new RenderOptions(precision, decimalMode, scientific, smallFractionsSizeLimit, matrixBrackets, charset);
+        }
+
+        public RenderOptions setCharset(CharacterSet charset) {
+            return new RenderOptions(precision, decimalMode, scientific, smallFractionsSizeLimit, matrixBrackets, charset);
         }
 
         public enum DecimalMode {

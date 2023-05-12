@@ -1,7 +1,5 @@
 package com.github.rccookie.math.rendering;
 
-import java.util.function.Function;
-
 import com.github.rccookie.primitive.int2;
 import com.github.rccookie.util.Arguments;
 import com.github.rccookie.xml.Node;
@@ -34,33 +32,20 @@ final class Integral implements RenderableExpression {
     }
 
     @Override
-    public AsciiArt renderAscii(RenderOptions options) {
-        return renderArt(renderableExpression -> renderableExpression.renderAscii(options), 3, null, "/", "|", "/");
-    }
-
-    @Override
-    public AsciiArt renderUnicode(RenderOptions options) {
-        return renderArt(renderableExpression -> renderableExpression.renderUnicode(options), 1, "\u222B", "\u2320", "\u23AE", "\u2321");
-    }
-
-    @Override
-    public AsciiArt renderAscii(RenderOptions options, CharacterSet charset) {
-        if(charset.canDisplay("\u222B\u2320\u23AE\u2321"))
-            return renderArt(e -> e.renderAscii(options, charset), 1, "\u222B", "\u2320", "\u23AE", "\u2321");
-        return renderArt(e -> e.renderAscii(options, charset), 3, null, "/", "|", "/");
-    }
-
-    private AsciiArt renderArt(Function<RenderableExpression, AsciiArt> renderer, int minHeight, String inline, String top, String middle, String bottom) {
-        AsciiArt value = renderer.apply(this.value);
-        AsciiArt symbol = createSymbol(value.height(), minHeight, inline, top, middle, bottom);
+    public AsciiArt renderAsciiArt(RenderOptions options) {
+        AsciiArt value = this.value.renderAsciiArt(options);
+        AsciiArt symbol;
+        if(options.charset.canDisplay("\u222B\u2320\u23AE\u2321"))
+            symbol = createSymbol(value.height(), 1, "\u222B", "\u2320", "\u23AE", "\u2321");
+        else symbol = createSymbol(value.height(), 3, null, "/", "|", "/");
 
         AsciiArt art = symbol;
         if(this.a != null) {
-            AsciiArt a = renderer.apply(this.a);
+            AsciiArt a = this.a.renderAsciiArt(options);
             art = art.draw(a, new int2(-(a.width()-1) / 2, art.height()));
         }
         if(this.b != null) {
-            AsciiArt b = renderer.apply(this.b);
+            AsciiArt b = this.b.renderAsciiArt(options);
             art = art.draw(b, new int2(-b.width()/2, -b.height()));
         }
         return art.appendCenter(value);

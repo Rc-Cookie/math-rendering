@@ -29,27 +29,11 @@ final class Superscript implements RenderableExpression {
     }
 
     @Override
-    public AsciiArt renderAscii(RenderOptions options) {
-        return renderArt(a.renderAscii(options), b.renderAscii(options), a instanceof Superscript || a instanceof SuperSubscript, null);
-    }
-
-    @Override
-    public AsciiArt renderUnicode(RenderOptions options) {
-        AsciiArt a = this.a.renderUnicode(options), b = this.b.renderUnicode(options);
+    public AsciiArt renderAsciiArt(RenderOptions options) {
+        AsciiArt a = this.a.renderAsciiArt(options), b = this.b.renderAsciiArt(options);
         if(b.height() == 1 && !Utils.isSuperscript(a.toString())) {
             String superscript = Utils.toSuperscript(b.getLine(0));
-            if(superscript != null)
-                return a.appendTop(new AsciiArt(superscript));
-        }
-        return renderArt(a, b, this.a instanceof Superscript || this.a instanceof SuperSubscript, null);
-    }
-
-    @Override
-    public AsciiArt renderAscii(RenderOptions options, CharacterSet charset) {
-        AsciiArt a = this.a.renderAscii(options, charset), b = this.b.renderAscii(options, charset);
-        if(b.height() == 1 && !Utils.isSuperscript(a.toString())) {
-            String superscript = Utils.toSuperscript(b.getLine(0));
-            if(superscript != null && charset.canDisplay(superscript))
+            if(superscript != null && options.charset.canDisplay(superscript))
                 return a.appendTop(new AsciiArt(superscript));
         }
         return renderArt(a, b, this.a instanceof Superscript || this.a instanceof SuperSubscript, null);

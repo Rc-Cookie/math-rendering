@@ -25,17 +25,7 @@ final class Literal implements RenderableExpression {
     }
 
     @Override
-    public AsciiArt renderAscii(RenderOptions options) {
-        return new AsciiArt(value);
-    }
-
-    @Override
-    public AsciiArt renderUnicode(RenderOptions options) {
-        return new AsciiArt(value);
-    }
-
-    @Override
-    public AsciiArt renderAscii(RenderOptions options, CharacterSet charset) {
+    public AsciiArt renderAsciiArt(RenderOptions options) {
         return new AsciiArt(value);
     }
 

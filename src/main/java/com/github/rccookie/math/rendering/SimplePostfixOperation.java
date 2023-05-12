@@ -24,18 +24,8 @@ final class SimplePostfixOperation implements RenderableExpression {
     }
 
     @Override
-    public AsciiArt renderAscii(RenderOptions options) {
-        return value.renderAscii(options).appendCenter(symbol.renderAscii(options));
-    }
-
-    @Override
-    public AsciiArt renderUnicode(RenderOptions options) {
-        return value.renderUnicode(options).appendCenter(symbol.renderUnicode(options));
-    }
-
-    @Override
-    public AsciiArt renderAscii(RenderOptions options, CharacterSet charset) {
-        return value.renderAscii(options, charset).appendCenter(symbol.renderAscii(options, charset));
+    public AsciiArt renderAsciiArt(RenderOptions options) {
+        return value.renderAsciiArt(options).appendCenter(symbol.renderAsciiArt(options));
     }
 
     @Override

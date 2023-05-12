@@ -28,24 +28,10 @@ final class Concatenation implements RenderableExpression {
     }
 
     @Override
-    public AsciiArt renderAscii(RenderOptions options) {
+    public AsciiArt renderAsciiArt(RenderOptions options) {
         if(renderSpace())
-            return a.renderAscii(options).appendTop(new AsciiArt(" ")).appendCenter(b.renderAscii(options));
-        return a.renderAscii(options).appendCenter(b.renderAscii(options));
-    }
-
-    @Override
-    public AsciiArt renderUnicode(RenderOptions options) {
-        if(renderSpace())
-            return a.renderUnicode(options).appendTop(new AsciiArt(" ")).appendCenter(b.renderUnicode(options));
-        return a.renderUnicode(options).appendCenter(b.renderUnicode(options));
-    }
-
-    @Override
-    public AsciiArt renderAscii(RenderOptions options, CharacterSet charset) {
-        if(renderSpace())
-            return a.renderAscii(options, charset).appendTop(new AsciiArt(" ")).appendCenter(b.renderAscii(options, charset));
-        return a.renderAscii(options, charset).appendCenter(b.renderAscii(options, charset));
+            return a.renderAsciiArt(options).appendTop(new AsciiArt(" ")).appendCenter(b.renderAsciiArt(options));
+        return a.renderAsciiArt(options).appendCenter(b.renderAsciiArt(options));
     }
 
     @Override

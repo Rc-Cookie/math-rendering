@@ -26,21 +26,9 @@ final class SimpleInfixOperation implements RenderableExpression {
     }
 
     @Override
-    public AsciiArt renderAscii(RenderOptions options) {
-        return renderArt(a.renderAscii(options), b.renderAscii(options), symbol.renderAscii(options));
-    }
+    public AsciiArt renderAsciiArt(RenderOptions options) {
+        AsciiArt a = this.a.renderAsciiArt(options), b = this.b.renderAsciiArt(options), symbol = this.symbol.renderAsciiArt(options);
 
-    @Override
-    public AsciiArt renderUnicode(RenderOptions options) {
-        return renderArt(a.renderUnicode(options), b.renderUnicode(options), symbol.renderUnicode(options));
-    }
-
-    @Override
-    public AsciiArt renderAscii(RenderOptions options, CharacterSet charset) {
-        return renderArt(a.renderAscii(options, charset), b.renderAscii(options, charset), symbol.renderAscii(options, charset));
-    }
-
-    private static AsciiArt renderArt(AsciiArt a, AsciiArt b, AsciiArt symbol) {
         boolean spaces = (a.height() > 2 || b.height() > 2) && (symbol.height() != 1 || !hasPadding(symbol.toString()));
         AsciiArt art = a;
         if(spaces) art = art.appendTop(new AsciiArt(" "));

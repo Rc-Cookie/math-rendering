@@ -2,11 +2,16 @@ package com.github.rccookie.math.rendering;
 
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.IntPredicate;
 
 public final class CharacterSet {
+
+    public static final CharacterSet ASCII = new CharacterSet(StandardCharsets.US_ASCII);
+    public static final CharacterSet UNICODE = new CharacterSet(StandardCharsets.UTF_8);
+    public static final CharacterSet ISO_8859_1 = new CharacterSet(StandardCharsets.ISO_8859_1);
 
     private final IntPredicate filter;
     private final Map<Integer, Boolean> cache = new HashMap<>();

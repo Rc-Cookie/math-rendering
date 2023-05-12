@@ -91,18 +91,8 @@ final class SpecialLiteral implements RenderableExpression {
     }
 
     @Override
-    public AsciiArt renderAscii(RenderOptions options) {
-        return ascii;
-    }
-
-    @Override
-    public AsciiArt renderUnicode(RenderOptions options) {
-        return unicode;
-    }
-
-    @Override
-    public AsciiArt renderAscii(RenderOptions options, CharacterSet charset) {
-        return charset.orFallback(unicode, ascii);
+    public AsciiArt renderAsciiArt(RenderOptions options) {
+        return options.charset.orFallback(unicode, ascii);
     }
 
     @Override

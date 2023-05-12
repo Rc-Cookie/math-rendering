@@ -27,18 +27,14 @@ final class List implements RenderableExpression {
     }
 
     @Override
-    public AsciiArt renderAscii(RenderOptions options) {
-        return renderAsciiArt(renderableExpression -> renderableExpression.renderAscii(options));
-    }
+    public AsciiArt renderAsciiArt(RenderOptions options) {
+        if(this.elements.length == 0) return new AsciiArt("");
 
-    @Override
-    public AsciiArt renderUnicode(RenderOptions options) {
-        return renderAsciiArt(renderableExpression -> renderableExpression.renderUnicode(options));
-    }
-
-    @Override
-    public AsciiArt renderAscii(RenderOptions options, CharacterSet charset) {
-        return renderAsciiArt(e -> e.renderAscii(options, charset));
+        AsciiArt delimiter = this.delimiter.renderAsciiArt(options);
+        AsciiArt art = elements[0].renderAsciiArt(options);
+        for(int i=1; i<elements.length; i++)
+            art = art.appendCenter(delimiter).appendCenter(elements[i].renderAsciiArt(options));
+        return art;
     }
 
     @Override
@@ -60,18 +56,6 @@ final class List implements RenderableExpression {
             list.children.add(elements[i].renderMathMLNode(options));
         }
         return list;
-    }
-
-    private AsciiArt renderAsciiArt(Function<RenderableExpression, AsciiArt> renderer) {
-        if(this.elements.length == 0) return new AsciiArt("");
-
-        AsciiArt[] elements = Arrays.stream(this.elements).map(renderer).toArray(AsciiArt[]::new);
-        AsciiArt delimiter = renderer.apply(this.delimiter);
-
-        AsciiArt art = elements[0];
-        for(int i=1; i<elements.length; i++)
-            art = art.appendCenter(delimiter).appendCenter(elements[i]);
-        return art;
     }
 
     private String renderString(Function<RenderableExpression, String> renderer) {

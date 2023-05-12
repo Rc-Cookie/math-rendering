@@ -29,31 +29,15 @@ final class Brackets implements RenderableExpression {
     }
 
     @Override
-    public AsciiArt renderAscii(RenderOptions options) {
-        AsciiArt inner = this.inner.renderAscii(options);
-        return BracketLiteral.renderBracketAscii(type, true, inner.height())
-                .appendBottom(inner)
-                .appendBottom(BracketLiteral.renderBracketAscii(type, false, inner.height()));
-    }
-
-    @Override
-    public AsciiArt renderUnicode(RenderOptions options) {
-        AsciiArt inner = this.inner.renderUnicode(options);
-        return BracketLiteral.renderBracketUnicode(type, true, inner.height())
-                .appendBottom(inner)
-                .appendBottom(BracketLiteral.renderBracketUnicode(type, false, inner.height()));
-    }
-
-    @Override
-    public AsciiArt renderAscii(RenderOptions options, CharacterSet charset) {
-        AsciiArt inner = this.inner.renderAscii(options, charset);
+    public AsciiArt renderAsciiArt(RenderOptions options) {
+        AsciiArt inner = this.inner.renderAsciiArt(options);
         AsciiArt left = BracketLiteral.renderBracketUnicode(type, true, inner.height());
         AsciiArt right;
-        if(!charset.canDisplay(left.toString())) {
+        if(!options.charset.canDisplay(left.toString())) {
             left = BracketLiteral.renderBracketAscii(type, true, inner.height());
             right = BracketLiteral.renderBracketAscii(type, false, inner.height());
         }
-        else if(!charset.canDisplay((right = BracketLiteral.renderBracketUnicode(type, false, inner.height())).toString()))
+        else if(!options.charset.canDisplay((right = BracketLiteral.renderBracketUnicode(type, false, inner.height())).toString()))
             right = BracketLiteral.renderBracketAscii(type, false, inner.height());
         return left.appendBottom(inner).appendBottom(right);
     }

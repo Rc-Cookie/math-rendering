@@ -24,18 +24,8 @@ final class SimplePrefixOperation implements RenderableExpression {
     }
 
     @Override
-    public AsciiArt renderAscii(RenderOptions options) {
-        return symbol.renderAscii(options).appendCenter(value.renderAscii(options));
-    }
-
-    @Override
-    public AsciiArt renderUnicode(RenderOptions options) {
-        return symbol.renderUnicode(options).appendCenter(value.renderUnicode(options));
-    }
-
-    @Override
-    public AsciiArt renderAscii(RenderOptions options, CharacterSet charset) {
-        return symbol.renderAscii(options, charset).appendCenter(value.renderAscii(options, charset));
+    public AsciiArt renderAsciiArt(RenderOptions options) {
+        return symbol.renderAsciiArt(options).appendCenter(value.renderAsciiArt(options));
     }
 
     @Override

@@ -34,22 +34,10 @@ final class BracketLiteral implements RenderableExpression {
     }
 
     @Override
-    public AsciiArt renderAscii(RenderOptions options) {
-        AsciiArt inner = this.inner.renderAscii(options);
-        return renderBracketAscii(type, left, inner.height()).appendTop(inner);
-    }
-
-    @Override
-    public AsciiArt renderUnicode(RenderOptions options) {
-        AsciiArt inner = this.inner.renderUnicode(options);
-        return renderBracketUnicode(type, left, inner.height()).appendTop(inner);
-    }
-
-    @Override
-    public AsciiArt renderAscii(RenderOptions options, CharacterSet charset) {
-        AsciiArt inner = this.inner.renderAscii(options, charset);
+    public AsciiArt renderAsciiArt(RenderOptions options) {
+        AsciiArt inner = this.inner.renderAsciiArt(options);
         AsciiArt bracket = renderBracketUnicode(type, left, inner.height());
-        if(!charset.canDisplay(inner.toString()))
+        if(!options.charset.canDisplay(inner))
             bracket = renderBracketAscii(type, left, inner.height());
         return bracket.appendTop(inner);
     }

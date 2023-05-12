@@ -1,7 +1,6 @@
 package com.github.rccookie.math.rendering;
 
 import java.util.Arrays;
-import java.util.function.Function;
 
 import com.github.rccookie.primitive.int2;
 import com.github.rccookie.util.Arguments;
@@ -45,25 +44,11 @@ final class Grid implements RenderableExpression {
     }
 
     @Override
-    public AsciiArt renderAscii(RenderOptions options) {
-        return renderGrid(renderableExpression -> renderableExpression.renderAscii(options));
-    }
-
-    @Override
-    public AsciiArt renderUnicode(RenderOptions options) {
-        return renderGrid(renderableExpression -> renderableExpression.renderUnicode(options));
-    }
-
-    @Override
-    public AsciiArt renderAscii(RenderOptions options, CharacterSet charset) {
-        return renderGrid(e -> e.renderAscii(options, charset));
-    }
-
-    private AsciiArt renderGrid(Function<RenderableExpression, AsciiArt> elementRenderer) {
+    public AsciiArt renderAsciiArt(RenderOptions options) {
         AsciiArt[][] elements = new AsciiArt[this.elements.length][this.elements[0].length];
         int[] widths = new int[elements[0].length], heights = new int[elements.length];
         for(int i=0; i<elements.length; i++) for(int j=0; j<elements[i].length; j++) {
-            elements[i][j] = elementRenderer.apply(this.elements[i][j]);
+            elements[i][j] = this.elements[i][j].renderAsciiArt(options);
             widths[j] = Math.max(widths[j], elements[i][j].width());
             heights[i] = Math.max(heights[i], elements[i][j].height());
         }
