@@ -1,8 +1,11 @@
 package com.github.rccookie.math.rendering;
 
+import com.github.rccookie.math.Precedence;
 import com.github.rccookie.primitive.int2;
 import com.github.rccookie.util.Arguments;
 import com.github.rccookie.xml.Node;
+
+import static com.github.rccookie.math.rendering.RenderMode.*;
 
 final class AugmentedGrid implements RenderableExpression {
 
@@ -21,16 +24,22 @@ final class AugmentedGrid implements RenderableExpression {
     }
 
     @Override
+    public int precedence() {
+        return Precedence.MID;
+    }
+
+    @Override
     public String renderInline(RenderOptions options) {
+        options = options.setOutsidePrecedence(precedence());
         StringBuilder str = new StringBuilder();
         for(int i=0; i<a.elements.length; i++) {
             if(i != 0) str.append(",");
             str.append("[");
             for(RenderableExpression e : a.elements[i])
-                str.append(e.renderInline(options)).append(" ");
+                str.append(" ").append(e.render(INLINE, options)).append(" ");
             str.append("|");
             for(RenderableExpression e : b.elements[i])
-                str.append(" ").append(e.renderInline(options));
+                str.append(" ").append(e.render(INLINE, options)).append(" ");
             str.append("]");
         }
         return str.toString();
@@ -38,15 +47,17 @@ final class AugmentedGrid implements RenderableExpression {
 
     @Override
     public AsciiArt renderAsciiArt(RenderOptions options) {
+        options = options.setOutsidePrecedence(precedence());
+
         char vert = options.charset.orFallback('\u2502', '|');
         int aLen = a.elements[0].length;
 
         AsciiArt[][] elements = new AsciiArt[a.elements.length][aLen + b.elements[0].length];
         for(int i=0; i<elements.length; i++) {
             for(int j=0; j<aLen; j++)
-                elements[i][j] = a.elements[i][j].renderAsciiArt(options);
+                elements[i][j] = a.elements[i][j].render(ASCII_ART, options);
             for(int j=0; j<b.elements[i].length; j++)
-                elements[i][j+aLen] = b.elements[i][j].renderAsciiArt(options);
+                elements[i][j+aLen] = b.elements[i][j].render(ASCII_ART, options);
         }
 
         int[] widths = new int[elements[0].length], heights = new int[elements.length];
@@ -79,13 +90,14 @@ final class AugmentedGrid implements RenderableExpression {
 
     @Override
     public String renderLatex(RenderOptions options) {
+        options = options.setOutsidePrecedence(precedence());
         StringBuilder str = new StringBuilder("\\begin{matrix}");
         for(int i=0; i<a.elements.length; i++) {
             for(RenderableExpression e : a.elements[i])
-                str.append(e.renderInline(options)).append("&");
+                str.append(e.render(LATEX, options)).append("&");
             str.append("\\bigm|");
             for(RenderableExpression e : b.elements[i])
-                str.append("&").append(e.renderInline(options));
+                str.append("&").append(e.render(LATEX, options));
             if(i != a.elements.length-1)
                 str.append("\\\\");
         }
@@ -94,6 +106,6 @@ final class AugmentedGrid implements RenderableExpression {
 
     @Override
     public Node renderMathMLNode(RenderOptions options) {
-        return new Middle(a,b).renderMathMLNode(options);
+        return new Middle(a,b).render(MATH_ML_NODE, options);
     }
 }

@@ -1,8 +1,11 @@
 package com.github.rccookie.math.rendering;
 
+import com.github.rccookie.math.Precedence;
 import com.github.rccookie.primitive.int2;
 import com.github.rccookie.util.Arguments;
 import com.github.rccookie.xml.Node;
+
+import static com.github.rccookie.math.rendering.RenderMode.*;
 
 final class Fraction implements RenderableExpression {
 
@@ -20,16 +23,20 @@ final class Fraction implements RenderableExpression {
     }
 
     @Override
+    public int precedence() {
+        return Precedence.FRACTION;
+    }
+
+    @Override
     public String renderInline(RenderOptions options) {
-        return Utils.encapsulate(a.renderInline(options))+"/"+Utils.encapsulate(b.renderInline(options));
+        return a.render(INLINE, options.setOutsidePrecedence(Precedence.DIVIDE))+"/"+b.render(INLINE, options.setOutsidePrecedence(Precedence.DIVIDE+1));
     }
 
     @Override
     public AsciiArt renderAsciiArt(RenderOptions options) {
-        return renderFraction(a.renderAsciiArt(options), b.renderAsciiArt(options), options);
-    }
+        AsciiArt a = this.a.render(ASCII_ART, options.setOutsidePrecedence(Precedence.MIN));
+        AsciiArt b = this.b.render(ASCII_ART, options.setOutsidePrecedence(Precedence.MIN));
 
-    private static AsciiArt renderFraction(AsciiArt a, AsciiArt b, RenderOptions options) {
         if(shouldRenderInline(a, b, options))
             return a.appendCenter(new AsciiArt("/")).appendCenter(b);
 
@@ -47,11 +54,13 @@ final class Fraction implements RenderableExpression {
 
     @Override
     public String renderLatex(RenderOptions options) {
-        return "\\frac{"+a.renderLatex(options)+"}{"+b.renderLatex(options)+"}";
+        options = options.setOutsidePrecedence(Precedence.MIN);
+        return "\\frac{"+a.render(LATEX, options)+"}{"+b.render(LATEX, options)+"}";
     }
 
     @Override
     public Node renderMathMLNode(RenderOptions options) {
+        options = options.setOutsidePrecedence(Precedence.MIN);
         Node frac = new Node("mfrac");
         frac.children.add(a.renderMathMLNode(options));
         frac.children.add(b.renderMathMLNode(options));

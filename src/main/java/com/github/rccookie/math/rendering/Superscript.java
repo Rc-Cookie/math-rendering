@@ -1,8 +1,11 @@
 package com.github.rccookie.math.rendering;
 
+import com.github.rccookie.math.Precedence;
 import com.github.rccookie.primitive.int2;
 import com.github.rccookie.util.Arguments;
 import com.github.rccookie.xml.Node;
+
+import static com.github.rccookie.math.rendering.RenderMode.*;
 
 final class Superscript implements RenderableExpression {
 
@@ -19,18 +22,23 @@ final class Superscript implements RenderableExpression {
     }
 
     @Override
+    public int precedence() {
+        return Precedence.SUPERSCRIPT;
+    }
+
+    @Override
     public String renderInline(RenderOptions options) {
-        String a = this.a.renderInline(options), b = this.b.renderInline(options);
+        String a = this.a.render(INLINE, options.setOutsidePrecedence(precedence()+1)), b = this.b.render(INLINE, options.setOutsidePrecedence(Precedence.MIN));
         if(!Utils.isSuperscript(a)) {
             String superscript = Utils.toSuperscript(b);
-            if(superscript != null) return a + superscript;
+            if(superscript != null && options.charset.canDisplay(superscript)) return a + superscript;
         }
-        return a+"^"+Utils.encapsulate(b);
+        return a+"^"+this.b.render(INLINE, options.setOutsidePrecedence(Precedence.MAX));
     }
 
     @Override
     public AsciiArt renderAsciiArt(RenderOptions options) {
-        AsciiArt a = this.a.renderAsciiArt(options), b = this.b.renderAsciiArt(options);
+        AsciiArt a = this.a.render(ASCII_ART, options), b = this.b.render(ASCII_ART, options);
         if(b.height() == 1 && !Utils.isSuperscript(a.toString())) {
             String superscript = Utils.toSuperscript(b.getLine(0));
             if(superscript != null && options.charset.canDisplay(superscript))
@@ -48,14 +56,14 @@ final class Superscript implements RenderableExpression {
 
     @Override
     public String renderLatex(RenderOptions options) {
-        return "{"+a.renderLatex(options)+"}^{"+b.renderLatex(options)+"}";
+        return "{"+a.render(LATEX, options.setOutsidePrecedence(precedence()+1))+"}^{"+b.render(LATEX, options.setOutsidePrecedence(Precedence.MIN))+"}";
     }
 
     @Override
     public Node renderMathMLNode(RenderOptions options) {
         Node sup = new Node("msup");
-        sup.children.add(a.renderMathMLNode(options));
-        sup.children.add(b.renderMathMLNode(options));
+        sup.children.add(a.render(MATH_ML_NODE, options.setOutsidePrecedence(precedence() + 1)));
+        sup.children.add(b.render(MATH_ML_NODE, options.setOutsidePrecedence(Precedence.MIN)));
         return sup;
     }
 }

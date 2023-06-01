@@ -1,8 +1,11 @@
 package com.github.rccookie.math.rendering;
 
+import com.github.rccookie.math.Precedence;
 import com.github.rccookie.util.Arguments;
 import com.github.rccookie.xml.Node;
 import com.github.rccookie.xml.Text;
+
+import static com.github.rccookie.math.rendering.RenderMode.*;
 
 final class BracketLiteral implements RenderableExpression {
 
@@ -29,13 +32,18 @@ final class BracketLiteral implements RenderableExpression {
     }
 
     @Override
+    public int precedence() {
+        return Precedence.SINGLE_BRACKET;
+    }
+
+    @Override
     public String renderInline(RenderOptions options) {
-        return (left ? LEFT_SYMBOLS_ASCII : RIGHT_SYMBOLS_ASCII)[type.ordinal()] + inner.renderInline(options);
+        return (left ? LEFT_SYMBOLS_ASCII : RIGHT_SYMBOLS_ASCII)[type.ordinal()] + inner.render(INLINE, options.setOutsidePrecedence(precedence()));
     }
 
     @Override
     public AsciiArt renderAsciiArt(RenderOptions options) {
-        AsciiArt inner = this.inner.renderAsciiArt(options);
+        AsciiArt inner = this.inner.render(ASCII_ART, options.setOutsidePrecedence(precedence()));
         AsciiArt bracket = renderBracketUnicode(type, left, inner.height());
         if(!options.charset.canDisplay(inner))
             bracket = renderBracketAscii(type, left, inner.height());
@@ -44,8 +52,9 @@ final class BracketLiteral implements RenderableExpression {
 
     @Override
     public String renderLatex(RenderOptions options) {
+        options = options.setOutsidePrecedence(precedence());
         if(left)
-            return "\\left" + LEFT_LATEX[type.ordinal()] + inner.renderLatex(options) + "\\right.";
+            return "\\left" + LEFT_LATEX[type.ordinal()] + inner.render(LATEX, options) + "\\right.";
         return "\\left." + inner.renderLatex(options) + "\\right" + RIGHT_LATEX[type.ordinal()];
     }
 
@@ -55,7 +64,7 @@ final class BracketLiteral implements RenderableExpression {
         o.children.add(new Text((left ? LEFT_SYMBOLS_UNICODE : RIGHT_SYMBOLS_UNICODE)[type.ordinal()]));
         o.attributes.put("fence", "true");
         o.attributes.put("stretchy", "true");
-        return Utils.join(o, inner.renderMathMLNode(options));
+        return Utils.join(o, inner.render(MATH_ML_NODE, options.setOutsidePrecedence(precedence())));
     }
 
     @SuppressWarnings("UnnecessaryUnicodeEscape")

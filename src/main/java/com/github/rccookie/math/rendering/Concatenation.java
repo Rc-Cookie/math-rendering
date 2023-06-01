@@ -2,8 +2,11 @@ package com.github.rccookie.math.rendering;
 
 import java.util.Set;
 
+import com.github.rccookie.math.Precedence;
 import com.github.rccookie.util.Arguments;
 import com.github.rccookie.xml.Node;
+
+import static com.github.rccookie.math.rendering.RenderMode.*;
 
 final class Concatenation implements RenderableExpression {
 
@@ -18,34 +21,43 @@ final class Concatenation implements RenderableExpression {
     }
 
     @Override
+    public int precedence() {
+        return maybeSpace ? Precedence.IMPLICIT : Math.min(a.precedence(), b.precedence());
+    }
+
+    @Override
     public String toString() {
         return (maybeSpace ? "implicit" : "concat") + "("+a+", "+b+")";
     }
 
     @Override
     public String renderInline(RenderOptions options) {
-        return a.renderInline(options) + (renderSpace() ? " " : "") + b.renderInline(options);
+        options = options.setOutsidePrecedence(precedence());
+        return a.render(INLINE, options) + (renderSpace(options) ? " " : "") + b.render(INLINE, options);
     }
 
     @Override
     public AsciiArt renderAsciiArt(RenderOptions options) {
-        if(renderSpace())
-            return a.renderAsciiArt(options).appendTop(new AsciiArt(" ")).appendCenter(b.renderAsciiArt(options));
-        return a.renderAsciiArt(options).appendCenter(b.renderAsciiArt(options));
+        options = options.setOutsidePrecedence(precedence());
+        if(renderSpace(options))
+            return a.render(ASCII_ART, options).appendTop(new AsciiArt(" ")).appendCenter(b.render(ASCII_ART, options));
+        return a.render(ASCII_ART, options).appendCenter(b.render(ASCII_ART, options));
     }
 
     @Override
     public String renderLatex(RenderOptions options) {
-        if(renderSpace())
-            return a.renderLatex(options) + " \\; " + b.renderLatex(options);
-        return a.renderLatex(options) + " " + b.renderLatex(options); // Math mode, spaces are ignored
+        options = options.setOutsidePrecedence(precedence());
+        if(renderSpace(options))
+            return a.render(LATEX, options) + " \\; " + b.render(LATEX, options);
+        return a.render(LATEX, options) + " " + b.render(LATEX, options); // Math mode, spaces are ignored
     }
 
     @Override
     public Node renderMathMLNode(RenderOptions options) {
-        if(renderSpace())
-            return Utils.join(a.renderMathMLNode(options), new Node("mspace"), b.renderMathMLNode(options));
-        return Utils.join(a.renderMathMLNode(options), b.renderMathMLNode(options));
+        options = options.setOutsidePrecedence(precedence());
+        if(renderSpace(options))
+            return Utils.join(a.render(MATH_ML_NODE, options), new Node("mspace"), b.render(MATH_ML_NODE, options));
+        return Utils.join(a.render(MATH_ML_NODE, options), b.render(MATH_ML_NODE, options));
     }
 
     private static final Set<Class<? extends RenderableExpression>> NO_SPACE_TYPES = Set.of(
@@ -55,8 +67,9 @@ final class Concatenation implements RenderableExpression {
             Grid.class
     );
 
-    private boolean renderSpace() {
+    private boolean renderSpace(RenderOptions options) {
         if(!maybeSpace) return false;
+        if(options.spaceMode == RenderOptions.SpaceMode.FORCE) return true;
         if(NO_SPACE_TYPES.contains(a.getClass()) || NO_SPACE_TYPES.contains(b.getClass()))
             return false;
         if(!(a instanceof NumberLiteral && b instanceof NumberLiteral)) return true;

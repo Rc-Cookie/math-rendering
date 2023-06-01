@@ -4,8 +4,8 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
 import java.math.RoundingMode;
-import java.util.function.BiFunction;
 
+import com.github.rccookie.math.Precedence;
 import com.github.rccookie.xml.Node;
 
 import org.jetbrains.annotations.Nullable;
@@ -60,6 +60,12 @@ final class Rational implements RenderableExpression {
         return "num("+n+", "+d+", "+precise+")";
     }
 
+    @Override
+    public int precedence() {
+        //noinspection DataFlowIssue
+        return Math.min(Math.min(Precedence.NEGATE, Precedence.MULTIPLY), Precedence.POWER);
+    }
+
     private BigDecimal toBigDecimal(RenderOptions options) {
         MathContext context = new MathContext(n.abs().divide(d).toString().length() + options.precision + 3, RoundingMode.HALF_UP);
         return new BigDecimal(n, context).divide(new BigDecimal(d, context), context).setScale(context.getPrecision(), context.getRoundingMode());
@@ -85,35 +91,36 @@ final class Rational implements RenderableExpression {
         return render(RenderableExpression::renderMathMLNode, options);
     }
 
-    private <T> T render(BiFunction<RenderableExpression, RenderOptions, T> renderer, RenderOptions options) {
+    @Override
+    public <T> T render(RenderMode<T> renderMode, RenderOptions options) {
         if(options.scientific && scientificNeeded(options))
-            return renderScientific(renderer, options);
+            return renderScientific(renderMode, options);
         options = options.setScientific(false);
         switch(getDecimalMode(options)) {
-            case FORCE_DECIMAL: return renderForceDecimal(renderer, options);
-            case FORCE_FRACTION: return renderForceFraction(renderer, options);
+            case FORCE_DECIMAL: return renderForceDecimal(renderMode, options);
+            case FORCE_FRACTION: return renderForceFraction(renderMode, options);
             default: throw new AssertionError();
         }
     }
 
-    private <T> T renderScientific(BiFunction<RenderableExpression, RenderOptions, T> renderer, RenderOptions options) {
+    private <T> T renderScientific(RenderMode<T> renderMode, RenderOptions options) {
         ScientificNotation s = calculateScientificNotation(options);
         RenderableExpression expr = new Superscript(new NumberLiteral("10"), new NumberLiteral(s.exponent+""));
         if(s.factor != null)
             expr = RenderableExpression.mult(s.factor, expr);
         if(s.negative)
             expr = RenderableExpression.neg(expr);
-        return renderer.apply(expr, options.setScientific(false));
+        return expr.render(renderMode, options.setScientific(false));
     }
 
-    private <T> T renderForceDecimal(BiFunction<RenderableExpression, RenderOptions, T> renderer, RenderOptions options) {
-        return renderer.apply(new NumberLiteral(toDecimalString(options)), options);
+    private <T> T renderForceDecimal(RenderMode<T> renderMode, RenderOptions options) {
+        return new NumberLiteral(toDecimalString(options)).render(renderMode, options);
     }
 
-    private <T> T renderForceFraction(BiFunction<RenderableExpression, RenderOptions, T> renderer, RenderOptions options) {
+    private <T> T renderForceFraction(RenderMode<T> renderMode, RenderOptions options) {
         if(d.equals(BigInteger.ONE))
-            return renderer.apply(new NumberLiteral(n.toString()), options);
-        return renderer.apply(new Fraction(new NumberLiteral(n.toString()), new NumberLiteral(d.toString())), options);
+            return new NumberLiteral(n.toString()).render(renderMode, options);
+        return new Fraction(new NumberLiteral(n.toString()), new NumberLiteral(d.toString())).render(renderMode, options);
     }
 
 

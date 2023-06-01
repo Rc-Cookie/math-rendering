@@ -1,7 +1,10 @@
 package com.github.rccookie.math.rendering;
 
+import com.github.rccookie.math.Precedence;
 import com.github.rccookie.util.Arguments;
 import com.github.rccookie.xml.Node;
+
+import static com.github.rccookie.math.rendering.RenderMode.*;
 
 final class Exp implements RenderableExpression {
 
@@ -12,23 +15,33 @@ final class Exp implements RenderableExpression {
     }
 
     @Override
+    public int precedence() {
+        return Math.min(Precedence.FUNCTION_CALL, Precedence.POWER);
+    }
+
+    @Override
     public String renderInline(RenderOptions options) {
-        return asCall().renderInline(options);
+        return asCall().render(INLINE, options);
     }
 
     @Override
     public AsciiArt renderAsciiArt(RenderOptions options) {
-        return asPower().renderAsciiArt(options);
+        return asPower().render(ASCII_ART, options);
     }
 
     @Override
     public String renderLatex(RenderOptions options) {
-        return asPower().renderLatex(options);
+        return asPower().render(LATEX, options);
     }
 
     @Override
     public Node renderMathMLNode(RenderOptions options) {
-        return asPower().renderMathMLNode(options);
+        return asPower().render(MATH_ML_NODE, options);
+    }
+
+    @Override
+    public <T> T render(RenderMode<T> mode, RenderOptions options) {
+        return mode.render(this, options);
     }
 
     private RenderableExpression asCall() {

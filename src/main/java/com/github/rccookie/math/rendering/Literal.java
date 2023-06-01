@@ -1,5 +1,6 @@
 package com.github.rccookie.math.rendering;
 
+import com.github.rccookie.math.Precedence;
 import com.github.rccookie.util.Arguments;
 import com.github.rccookie.xml.Node;
 import com.github.rccookie.xml.Text;
@@ -17,6 +18,11 @@ final class Literal implements RenderableExpression {
     @Override
     public String toString() {
         return value;
+    }
+
+    @Override
+    public int precedence() {
+        return Precedence.MAX;
     }
 
     @Override

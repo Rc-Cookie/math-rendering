@@ -3,14 +3,18 @@ package com.github.rccookie.math.rendering;
 import com.github.rccookie.util.Arguments;
 import com.github.rccookie.xml.Node;
 
-final class SimplePrefixOperation implements RenderableExpression {
+import static com.github.rccookie.math.rendering.RenderMode.*;
+
+class SimplePrefixOperation implements RenderableExpression {
 
     final RenderableExpression value;
     final RenderableExpression symbol;
+    final int precedence;
 
-    SimplePrefixOperation(RenderableExpression value, RenderableExpression symbol) {
+    SimplePrefixOperation(RenderableExpression value, RenderableExpression symbol, int precedence) {
         this.value = Arguments.checkNull(value, "value");
         this.symbol = Arguments.checkNull(symbol, "symbol");
+        this.precedence = precedence;
     }
 
     @Override
@@ -19,22 +23,27 @@ final class SimplePrefixOperation implements RenderableExpression {
     }
 
     @Override
+    public int precedence() {
+        return precedence;
+    }
+
+    @Override
     public String renderInline(RenderOptions options) {
-        return symbol.renderInline(options) + value.renderInline(options);
+        return symbol.render(INLINE, options) + value.render(INLINE, options.setOutsidePrecedence(Math.min(precedence, Integer.MAX_VALUE-1) + 1));
     }
 
     @Override
     public AsciiArt renderAsciiArt(RenderOptions options) {
-        return symbol.renderAsciiArt(options).appendCenter(value.renderAsciiArt(options));
+        return symbol.render(ASCII_ART, options).appendCenter(value.render(ASCII_ART, options.setOutsidePrecedence(Math.min(precedence, Integer.MAX_VALUE-1) + 1)));
     }
 
     @Override
     public String renderLatex(RenderOptions options) {
-        return symbol.renderLatex(options)+"{"+value.renderLatex(options)+"}";
+        return symbol.render(LATEX, options)+"{"+value.render(LATEX, options.setOutsidePrecedence(Math.min(precedence, Integer.MAX_VALUE-1) + 1))+"}";
     }
 
     @Override
     public Node renderMathMLNode(RenderOptions options) {
-        return Utils.join(symbol.renderMathMLNode(options), value.renderMathMLNode(options));
+        return Utils.join(symbol.render(MATH_ML_NODE, options), value.render(MATH_ML_NODE, options.setOutsidePrecedence(Math.min(precedence, Integer.MAX_VALUE-1) + 1)));
     }
 }

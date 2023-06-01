@@ -1,11 +1,14 @@
 package com.github.rccookie.math.rendering;
 
+import com.github.rccookie.math.Precedence;
 import com.github.rccookie.primitive.int2;
 import com.github.rccookie.util.Arguments;
 import com.github.rccookie.xml.Node;
 import com.github.rccookie.xml.Text;
 
 import org.jetbrains.annotations.Nullable;
+
+import static com.github.rccookie.math.rendering.RenderMode.*;
 
 final class Integral implements RenderableExpression {
 
@@ -27,8 +30,13 @@ final class Integral implements RenderableExpression {
     }
 
     @Override
+    public int precedence() {
+        return Precedence.ITERATION;
+    }
+
+    @Override
     public String renderInline(RenderOptions options) {
-        return new BigSymbol(RenderableExpression.num("\u222B"), a, b, value).renderInline(options);
+        return new BigSymbol(RenderableExpression.num("\u222B"), a, b, value).render(INLINE, options);
     }
 
     @Override
@@ -59,7 +67,14 @@ final class Integral implements RenderableExpression {
 
     @Override
     public String renderLatex(RenderOptions options) {
-        return new BigSymbol(RenderableExpression.num("\u222B"), a, b, value).renderLatex(options);
+        return new BigSymbol(RenderableExpression.num("\u222B"), a, b, value).render(LATEX, options);
+    }
+
+    @Override
+    public <T> T render(RenderMode<T> mode, RenderOptions options) {
+        if(mode == INLINE || mode == LATEX)
+            return mode.render(this, options);
+        return RenderableExpression.super.render(mode, options);
     }
 
     @Override
@@ -68,8 +83,8 @@ final class Integral implements RenderableExpression {
         Node underOver = new Node("munderover");
         symbol.children.add(new Text("\u222B"));
         underOver.children.add(symbol);
-        underOver.children.add(Utils.orEmpty(a, options));
-        underOver.children.add(Utils.orEmpty(b, options));
-        return Utils.join(underOver, value.renderMathMLNode(options));
+        underOver.children.add(Utils.orEmpty(a, options.setOutsidePrecedence(Precedence.MIN)));
+        underOver.children.add(Utils.orEmpty(b, options.setOutsidePrecedence(Precedence.MIN)));
+        return Utils.join(underOver, value.render(MATH_ML_NODE, options.setOutsidePrecedence(precedence())));
     }
 }

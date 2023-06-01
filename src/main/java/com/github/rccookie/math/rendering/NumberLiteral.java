@@ -1,5 +1,6 @@
 package com.github.rccookie.math.rendering;
 
+import com.github.rccookie.math.Precedence;
 import com.github.rccookie.util.Arguments;
 import com.github.rccookie.xml.Node;
 import com.github.rccookie.xml.Text;
@@ -10,6 +11,11 @@ final class NumberLiteral implements RenderableExpression {
 
     NumberLiteral(String value) {
         this.value = Arguments.checkNull(value, "value");
+    }
+
+    @Override
+    public int precedence() {
+        return value.startsWith("-") ? Precedence.NEGATE : Precedence.MAX;
     }
 
     @Override

@@ -1,8 +1,11 @@
 package com.github.rccookie.math.rendering;
 
+import com.github.rccookie.math.Precedence;
 import com.github.rccookie.primitive.int2;
 import com.github.rccookie.util.Arguments;
 import com.github.rccookie.xml.Node;
+
+import static com.github.rccookie.math.rendering.RenderMode.*;
 
 final class Root implements RenderableExpression {
 
@@ -19,16 +22,26 @@ final class Root implements RenderableExpression {
         return "root("+degree+", "+value+")";
     }
 
+    @Override
+    public int precedence() {
+        return Precedence.ROOT;
+    }
 
     @Override
     public String renderInline(RenderOptions options) {
-        String degree = this.degree.renderInline(options), value = this.value.renderInline(options);
-        if(degree.isEmpty() || degree.equals("2"))
-            return "\u221A" + Utils.encapsulate(value);
+        String degree = this.degree.render(INLINE, options.setOutsidePrecedence(Precedence.MIN));
+        if(degree.isEmpty() || degree.equals("2")) {
+            if(options.charset.canDisplay("\u221A"))
+                return "\u221A" + value.render(INLINE, options.setOutsidePrecedence(Precedence.MAX));
+            if(value instanceof Brackets && ((Brackets) value).type == Bracket.ROUND)
+                return "sqrt" + value.render(INLINE, options);
+            return "sqrt(" + value.render(INLINE, options.setOutsidePrecedence(Precedence.MIN)) + ")";
+        }
         String supDeg = Utils.toSuperscript(degree);
-        if(supDeg != null)
-            return supDeg + "\u221A" + Utils.encapsulate(value);
-        return "root("+degree+", "+value+")";
+        if(supDeg != null && options.charset.canDisplay("\u221A" + supDeg))
+            return supDeg + "\u221A" + value.render(INLINE, options.setOutsidePrecedence(Precedence.MAX));
+        options = options.setOutsidePrecedence(Precedence.COMMA + 1);
+        return "root("+this.degree.render(INLINE, options)+", "+value.render(INLINE, options)+")";
     }
 
     @Override
@@ -36,7 +49,9 @@ final class Root implements RenderableExpression {
         String leftDiag = options.charset.orFallback("\u2572", "\\");
         String rightDiag = options.charset.orFallback("\u2571", "/");
         String vert = options.charset.orFallback("\u2502", "|");
-        AsciiArt degree = this.degree.renderAsciiArt(options), value = this.value.renderAsciiArt(options);
+
+        options = options.setOutsidePrecedence(Precedence.MIN);
+        AsciiArt degree = this.degree.render(ASCII_ART, options), value = this.value.render(ASCII_ART, options);
 
         AsciiArt shape = createRootShape(value.height(), leftDiag, rightDiag);
         AsciiArt root = shape.appendTop(value);
@@ -66,12 +81,14 @@ final class Root implements RenderableExpression {
 
     @Override
     public String renderLatex(RenderOptions options) {
-        return "\\sqrt["+degree.renderLatex(options)+"]{"+value.renderLatex(options)+"}";
+        options = options.setOutsidePrecedence(Precedence.MIN);
+        return "\\sqrt["+degree.render(LATEX, options)+"]{"+value.render(LATEX, options)+"}";
     }
 
     @Override
     public Node renderMathMLNode(RenderOptions options) {
-        Node degree = this.degree.renderMathMLNode(options);
+        options = options.setOutsidePrecedence(Precedence.MIN);
+        Node degree = this.degree.render(MATH_ML_NODE, options);
         Node root;
         if(degree.text().isEmpty())
             root = new Node("msqrt");

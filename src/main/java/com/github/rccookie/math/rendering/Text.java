@@ -1,19 +1,30 @@
 package com.github.rccookie.math.rendering;
 
+import com.github.rccookie.math.Precedence;
 import com.github.rccookie.util.Arguments;
 import com.github.rccookie.xml.Node;
 
 final class Text implements RenderableExpression {
 
     private final String text;
+    private final int precedence;
 
     Text(String text) {
+        this(text, Precedence.MAX);
+    }
+    Text(String text, int precedence) {
         this.text = Arguments.checkNull(text, "text");
+        this.precedence = precedence;
     }
 
     @Override
     public String toString() {
         return "text("+text+")";
+    }
+
+    @Override
+    public int precedence() {
+        return precedence;
     }
 
     @Override

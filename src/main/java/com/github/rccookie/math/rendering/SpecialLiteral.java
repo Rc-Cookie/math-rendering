@@ -1,5 +1,6 @@
 package com.github.rccookie.math.rendering;
 
+import com.github.rccookie.math.Precedence;
 import com.github.rccookie.util.Arguments;
 import com.github.rccookie.xml.Node;
 
@@ -25,6 +26,7 @@ final class SpecialLiteral implements RenderableExpression {
     public static final RenderableExpression MULTIPLY = new SpecialLiteral(true, "\u00B7", "*", "\u00B7", "\\cdot");
     public static final RenderableExpression DIVIDE = new Literal(true, "/");
     public static final RenderableExpression CROSS = new SpecialLiteral(true, "\u2A2F", "x", "\u2A2F", "\\times");
+    public static final RenderableExpression MODULO = new SpecialLiteral(true, " mod ", " mod ", " mod ", "\\mod");
     public static final RenderableExpression EQUALS = new Literal(true, "=");
     public static final RenderableExpression NOT_EQUALS = new SpecialLiteral(true, "!=", "!=", "\u2260", "\\not=");
     public static final RenderableExpression APPROXIMATELY = new SpecialLiteral(true, "\u2248", "~", "\u2248", "\\approx");
@@ -37,8 +39,8 @@ final class SpecialLiteral implements RenderableExpression {
     public static final RenderableExpression NOT_LESS_OR_EQUAL = new SpecialLiteral(true, "\u2270", "!<=", "\u2270", "\\not\\leq");
     public static final RenderableExpression GREATER_OR_EQUAL = new SpecialLiteral(true, ">=", ">=", "\u2A7E", "\\geq");
     public static final RenderableExpression NOT_GREATER_OR_EQUAL = new SpecialLiteral(true, "\u2271", "!<=", "\u2271", "\\not\\geq");
-    public static final RenderableExpression DEFINE = new SpecialLiteral(true, " := ", " := ", " := ", " := ", "\u2254");
-    public static final RenderableExpression DEFINE_REVERSE = new SpecialLiteral(true, " =: ", " =: ", " =: ", " =: ", "\u2255");
+    public static final RenderableExpression DEFINE = new SpecialLiteral(true, " := ", " := ", " \u2254 ", " := ", "\u2254");
+    public static final RenderableExpression DEFINE_REVERSE = new SpecialLiteral(true, " =: ", " =: ", " \u2255 ", " =: ", "\u2255");
     public static final RenderableExpression IN = new SpecialLiteral(" \u2208 ", new AsciiArt("  __ \n /__ \n \\__ ").setCenter(1), new AsciiArt(" \u2208 "), "\\in", new Literal(true, "\u2208").renderMathMLNode(RenderOptions.DEFAULT));
     public static final RenderableExpression NOT_IN = new SpecialLiteral(" \u2209 ", new AsciiArt("  __/\n /_/ \n \\/_ \n /").setCenter(1), new AsciiArt(" \u2209 "), "\\not\\in", new Literal(true, "\u2209").renderMathMLNode(RenderOptions.DEFAULT));
     public static final RenderableExpression CONTAINS = new SpecialLiteral(" \u220B ", new AsciiArt(" __/\n _/\\ \n /_/\n/").setCenter(1), new AsciiArt(" \u220B "), "\\ni", new Literal(true, "\u220B").renderMathMLNode(RenderOptions.DEFAULT));
@@ -83,6 +85,11 @@ final class SpecialLiteral implements RenderableExpression {
     @Override
     public String toString() {
         return inline;
+    }
+
+    @Override
+    public int precedence() {
+        return Precedence.MAX;
     }
 
     @Override

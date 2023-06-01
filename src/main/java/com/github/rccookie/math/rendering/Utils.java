@@ -84,10 +84,6 @@ final class Utils {
         return oneNumber(s) || oneVar(s);
     }
 
-    public static String encapsulate(String s) {
-        if(s.isEmpty()) return "()";
-        return oneNumOrVar(s) ? s : "("+s+")";
-    }
 
     private static boolean oneVar(String s, boolean allowMinus) {
         char c = s.charAt(0);
@@ -133,7 +129,7 @@ final class Utils {
     }
 
     public static Node orEmpty(@Nullable RenderableExpression e, RenderableExpression.RenderOptions options) {
-        return e != null ? e.renderMathMLNode(options) : emptyNode();
+        return e != null ? e.render(RenderMode.MATH_ML_NODE, options) : emptyNode();
     }
 
     public static Node join(Node... nodes) {

@@ -1,8 +1,11 @@
 package com.github.rccookie.math.rendering;
 
+import com.github.rccookie.math.Precedence;
 import com.github.rccookie.util.Arguments;
 import com.github.rccookie.xml.Node;
 import com.github.rccookie.xml.Text;
+
+import static com.github.rccookie.math.rendering.RenderMode.*;
 
 final class Middle implements RenderableExpression {
 
@@ -19,14 +22,22 @@ final class Middle implements RenderableExpression {
     }
 
     @Override
+    public int precedence() {
+        return Precedence.MID;
+    }
+
+    @Override
     public String renderInline(RenderOptions options) {
-        return a.renderInline(options) + " | " + b.renderInline(options);
+        options = options.setOutsidePrecedence(precedence() + 1);
+        return a.render(INLINE, options) + " | " + b.render(INLINE, options);
     }
 
     @Override
     public AsciiArt renderAsciiArt(RenderOptions options) {
+        options = options.setOutsidePrecedence(precedence() + 1);
+
         String bar = options.charset.orFallback("|", "\u2502");
-        AsciiArt a = this.a.renderAsciiArt(options), b = this.b.renderAsciiArt(options);
+        AsciiArt a = this.a.render(ASCII_ART, options), b = this.b.render(ASCII_ART, options);
 
         int height = Math.max(a.center(), b.center()), depth = Math.max(a.height()-a.center(), b.height()-b.center());
         int totalHeight = height + depth;
@@ -36,16 +47,18 @@ final class Middle implements RenderableExpression {
 
     @Override
     public String renderLatex(RenderOptions options) {
-        return "\\left."+a.renderLatex(options)+"\\;\\middle|\\;"+b.renderLatex(options)+"\\right.";
+        options = options.setOutsidePrecedence(precedence() + 1);
+        return "\\left."+a.render(LATEX, options)+"\\;\\middle|\\;"+b.render(LATEX, options)+"\\right.";
     }
 
     @Override
     public Node renderMathMLNode(RenderOptions options) {
+        options = options.setOutsidePrecedence(precedence() + 1);
         Node o = new Node("mo");
         o.children.add(new Text("|"));
         o.attributes.put("separator", "true");
         o.attributes.put("fence", "true");
         o.attributes.put("stretchy", "true");
-        return Utils.join(a.renderMathMLNode(options), o, b.renderMathMLNode(options));
+        return Utils.join(a.render(MATH_ML_NODE, options), o, b.render(MATH_ML_NODE, options));
     }
 }

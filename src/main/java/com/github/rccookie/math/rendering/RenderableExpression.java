@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Objects;
 
+import com.github.rccookie.math.Precedence;
 import com.github.rccookie.util.Arguments;
 import com.github.rccookie.xml.Node;
 
@@ -14,6 +15,8 @@ public interface RenderableExpression {
     Bracket DEFAULT_MATRIX_BRACKET = Bracket.SQUARE;
 
 
+
+    int precedence();
 
     String renderInline(RenderOptions options);
 
@@ -30,6 +33,12 @@ public interface RenderableExpression {
         math.attributes.put("display", inline ? "inline" : "block");
         math.children.add(renderMathMLNode(options));
         return math;
+    }
+
+    default <T> T render(RenderMode<T> mode, RenderOptions options) {
+        if(options.autoParenthesis && options.outsidePrecedence > precedence())
+            return par(this).render(mode, options);
+        return mode.render(this, options);
     }
 
 
@@ -97,6 +106,10 @@ public interface RenderableExpression {
 
     static RenderableExpression cross() {
         return SpecialLiteral.CROSS;
+    }
+
+    static RenderableExpression mod() {
+        return SpecialLiteral.MODULO;
     }
 
     static RenderableExpression eq() {
@@ -453,153 +466,157 @@ public interface RenderableExpression {
     // ---------------------------------------------------
 
     static RenderableExpression plus(RenderableExpression a, RenderableExpression b) {
-        return infix(plus(), a, b);
+        return b instanceof Negate ? minus(a, ((Negate) b).value) : infix(plus(), a, b, Precedence.PLUS, true);
     }
 
     static RenderableExpression minus(RenderableExpression a, RenderableExpression b) {
-        return infix(minus(), a, b);
+        return infix(minus(), a, b, Precedence.PLUS, false);
     }
 
     static RenderableExpression mult(RenderableExpression a, RenderableExpression b) {
-        return infix(mult(), a, b);
+        return infix(mult(), a, b, Precedence.MULTIPLY, true);
     }
 
     static RenderableExpression div(RenderableExpression a, RenderableExpression b) {
-        return infix(div(), a, b);
+        return infix(div(), a, b, Precedence.DIVIDE, false);
     }
 
     static RenderableExpression cross(RenderableExpression a, RenderableExpression b) {
-        return infix(cross(), a, b);
+        return infix(cross(), a, b, Precedence.MULTIPLY, true);
+    }
+
+    static RenderableExpression mod(RenderableExpression a, RenderableExpression b) {
+        return infix(mod(), a, b, Precedence.MODULO, false);
     }
 
     static RenderableExpression eq(RenderableExpression a, RenderableExpression b) {
-        return infix(eq(), a, b);
+        return infix(eq(), a, b, Precedence.EQUALS, true);
     }
 
     static RenderableExpression nEquals(RenderableExpression a, RenderableExpression b) {
-        return infix(nEquals(), a, b);
+        return infix(nEquals(), a, b, Precedence.EQUALS, true);
     }
 
     static RenderableExpression approx(RenderableExpression a, RenderableExpression b) {
-        return infix(approx(), a, b);
+        return infix(approx(), a, b, Precedence.EQUALS, true);
     }
 
     static RenderableExpression nApprox(RenderableExpression a, RenderableExpression b) {
-        return infix(nApprox(), a, b);
+        return infix(nApprox(), a, b, Precedence.EQUALS, true);
     }
 
     static RenderableExpression less(RenderableExpression a, RenderableExpression b) {
-        return infix(less(), a, b);
+        return infix(less(), a, b, Precedence.LESS, true);
     }
 
     static RenderableExpression nLess(RenderableExpression a, RenderableExpression b) {
-        return infix(nLess(), a, b);
+        return infix(nLess(), a, b, Precedence.LESS, true);
     }
 
     static RenderableExpression leq(RenderableExpression a, RenderableExpression b) {
-        return infix(leq(), a, b);
+        return infix(leq(), a, b, Precedence.LESS_OR_EQUAL, true);
     }
 
     static RenderableExpression nLeq(RenderableExpression a, RenderableExpression b) {
-        return infix(nLeq(), a, b);
+        return infix(nLeq(), a, b, Precedence.LESS_OR_EQUAL, true);
     }
 
     static RenderableExpression greater(RenderableExpression a, RenderableExpression b) {
-        return infix(greater(), a, b);
+        return infix(greater(), a, b, Precedence.GREATER, true);
     }
 
     static RenderableExpression nGreater(RenderableExpression a, RenderableExpression b) {
-        return infix(nGreater(), a, b);
+        return infix(nGreater(), a, b, Precedence.GREATER, true);
     }
 
     static RenderableExpression geq(RenderableExpression a, RenderableExpression b) {
-        return infix(geq(), a, b);
+        return infix(geq(), a, b, Precedence.GREATER_OR_EQUAL, true);
     }
 
     static RenderableExpression nGeq(RenderableExpression a, RenderableExpression b) {
-        return infix(nGeq(), a, b);
+        return infix(nGeq(), a, b, Precedence.GREATER_OR_EQUAL, true);
     }
 
     static RenderableExpression def(RenderableExpression a, RenderableExpression b) {
-        return infix(def(), a, b);
+        return infix(def(), a, b, Precedence.DEFINE, true);
     }
 
     static RenderableExpression defRev(RenderableExpression a, RenderableExpression b) {
-        return infix(defRev(), a, b);
+        return infix(defRev(), a, b, Precedence.DEFINE, true);
     }
 
     static RenderableExpression in(RenderableExpression a, RenderableExpression b) {
-        return infix(in(), a, b);
+        return infix(in(), a, b, Precedence.IN, false);
     }
 
     static RenderableExpression nIn(RenderableExpression a, RenderableExpression b) {
-        return infix(nIn(), a, b);
+        return infix(nIn(), a, b, Precedence.IN, false);
     }
 
     static RenderableExpression contains(RenderableExpression a, RenderableExpression b) {
-        return infix(contains(), a, b);
+        return infix(contains(), a, b, Precedence.IN, false);
     }
 
     static RenderableExpression nContains(RenderableExpression a, RenderableExpression b) {
-        return infix(nContains(), a, b);
+        return infix(nContains(), a, b, Precedence.IN, false);
     }
 
     static RenderableExpression and(RenderableExpression a, RenderableExpression b) {
-        return infix(and(), a, b);
+        return infix(and(), a, b, Precedence.AND, true);
     }
 
     static RenderableExpression or(RenderableExpression a, RenderableExpression b) {
-        return infix(or(), a, b);
+        return infix(or(), a, b, Precedence.OR, true);
     }
 
-    static RenderableExpression infix(RenderableExpression symbol, RenderableExpression a, RenderableExpression b) {
-        return new SimpleInfixOperation(a, b, symbol);
+    static RenderableExpression infix(RenderableExpression symbol, RenderableExpression a, RenderableExpression b, int precedence, boolean associative) {
+        return new SimpleInfixOperation(a, b, symbol, precedence, associative);
     }
 
-    static RenderableExpression infix(String symbol, RenderableExpression a, RenderableExpression b) {
+    static RenderableExpression infix(String symbol, RenderableExpression a, RenderableExpression b, int precedence, boolean associative) {
         if(Arguments.checkNull(symbol, "symbol").contains("\n"))
             throw new IllegalArgumentException("Symbol may not contain newline characters");
-        return infix(symbol(symbol), a, b);
+        return infix(symbol(symbol), a, b, precedence, associative);
     }
 
     static RenderableExpression neg(RenderableExpression value) {
-        return prefix(neg(), value);
+        return new Negate(value);
     }
 
     static RenderableExpression not(RenderableExpression value) {
-        return prefix(not(), value);
+        return prefix(not(), value, Precedence.NOT);
     }
 
-    static RenderableExpression prefix(RenderableExpression symbol, RenderableExpression value) {
-        return new SimplePrefixOperation(value, symbol);
+    static RenderableExpression prefix(RenderableExpression symbol, RenderableExpression value, int precedence) {
+        return new SimplePrefixOperation(value, symbol, precedence);
     }
 
-    static RenderableExpression prefix(String symbol, RenderableExpression value) {
+    static RenderableExpression prefix(String symbol, RenderableExpression value, int precedence) {
         if(Arguments.checkNull(symbol, "symbol").contains("\n"))
             throw new IllegalArgumentException("Symbol may not contain newline characters");
-        return prefix(symbol(symbol), value);
+        return prefix(symbol(symbol), value, precedence);
     }
 
     static RenderableExpression factorial(RenderableExpression value) {
-        return postfix(factorial(), value);
+        return postfix(factorial(), value, Precedence.FACTORIAL);
     }
 
     static RenderableExpression percent(RenderableExpression value) {
-        return new SimplePostfixOperation(percent(), value);
+        return new SimplePostfixOperation(percent(), value, Precedence.PERCENT);
     }
 
     static RenderableExpression deg(RenderableExpression value) {
-        return new SimplePostfixOperation(deg(), value);
+        return new SimplePostfixOperation(deg(), value, Precedence.DEGREE);
     }
 
-    static RenderableExpression postfix(RenderableExpression symbol, RenderableExpression value) {
-        return new SimplePostfixOperation(value, symbol);
+    static RenderableExpression postfix(RenderableExpression symbol, RenderableExpression value, int precedence) {
+        return new SimplePostfixOperation(value, symbol, precedence);
     }
 
-    static RenderableExpression postfix(String symbol, RenderableExpression value) {
+    static RenderableExpression postfix(String symbol, RenderableExpression value, int precedence) {
         if(Arguments.checkNull(symbol, "symbol").contains("\n"))
             throw new IllegalArgumentException("Symbol may not contain newline characters");
-        return postfix(symbol(symbol), value);
+        return postfix(symbol(symbol), value, precedence);
     }
 
     // ---------------------------------------------------
@@ -661,7 +678,7 @@ public interface RenderableExpression {
     }
 
     static RenderableExpression lim(RenderableExpression var, RenderableExpression target, RenderableExpression value) {
-        return big(lim(), infix(arrow(true, false), var, target), null, value);
+        return big(lim(), infix(arrow(true, false), var, target, Precedence.LAMBDA, false), null, value);
     }
 
     static RenderableExpression big(RenderableExpression symbol, @Nullable RenderableExpression subscript, @Nullable RenderableExpression superscript, RenderableExpression value) {
@@ -688,18 +705,24 @@ public interface RenderableExpression {
         public final int smallFractionsSizeLimit;
         public final Bracket matrixBrackets;
         public final CharacterSet charset;
+        public final boolean autoParenthesis;
+        public final int outsidePrecedence;
+        public final SpaceMode spaceMode;
 
         public RenderOptions(int precision, DecimalMode decimalMode, boolean scientific) {
-            this(precision, decimalMode, scientific, 4, Bracket.SQUARE, CharacterSet.UNICODE);
+            this(precision, decimalMode, scientific, 4, Bracket.SQUARE, CharacterSet.UNICODE, true, Precedence.MIN, SpaceMode.AUTO);
         }
 
-        public RenderOptions(int precision, DecimalMode decimalMode, boolean scientific, int smallFractionsSizeLimit, Bracket matrixBrackets, CharacterSet charset) {
+        public RenderOptions(int precision, DecimalMode decimalMode, boolean scientific, int smallFractionsSizeLimit, Bracket matrixBrackets, CharacterSet charset, boolean autoParenthesis, int outsidePrecedence, SpaceMode spaceMode) {
             this.precision = Arguments.checkRange(precision, 1, null);
             this.decimalMode = Arguments.checkNull(decimalMode, "decimalMode");
             this.scientific = scientific;
             this.smallFractionsSizeLimit = Arguments.checkRange(smallFractionsSizeLimit, 0, null);
             this.matrixBrackets = Arguments.checkNull(matrixBrackets, "matrixBrackets");
             this.charset = Arguments.checkNull(charset, "charset");
+            this.autoParenthesis = autoParenthesis;
+            this.outsidePrecedence = outsidePrecedence;
+            this.spaceMode = Arguments.checkNull(spaceMode, "spaceMode");
         }
 
         @Override
@@ -711,6 +734,9 @@ public interface RenderableExpression {
                     ", smallFractionsSizeLimit=" + smallFractionsSizeLimit +
                     ", matrixBrackets=" + matrixBrackets +
                     ", charset=" + charset +
+                    ", autoParenthesis=" + autoParenthesis +
+                    ", outsidePrecedence=" + outsidePrecedence +
+                    ", spaceMode=" + spaceMode +
                     '}';
         }
 
@@ -719,36 +745,55 @@ public interface RenderableExpression {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
             RenderOptions that = (RenderOptions) o;
-            return precision == that.precision && scientific == that.scientific && decimalMode == that.decimalMode;
+            return precision == that.precision
+                    && scientific == that.scientific
+                    && decimalMode == that.decimalMode
+                    && smallFractionsSizeLimit == that.smallFractionsSizeLimit
+                    && matrixBrackets == that.matrixBrackets
+                    && autoParenthesis == that.autoParenthesis
+                    && outsidePrecedence == that.outsidePrecedence
+                    && spaceMode == that.spaceMode;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(precision, decimalMode, scientific);
+            return Objects.hash(precision, decimalMode, scientific, smallFractionsSizeLimit, matrixBrackets, autoParenthesis, outsidePrecedence, spaceMode);
         }
 
         public RenderOptions setPrecision(int precision) {
-            return new RenderOptions(precision, decimalMode, scientific, smallFractionsSizeLimit, matrixBrackets, charset);
+            return new RenderOptions(precision, decimalMode, scientific, smallFractionsSizeLimit, matrixBrackets, charset, autoParenthesis, outsidePrecedence, spaceMode);
         }
 
         public RenderOptions setDecimalMode(DecimalMode decimalMode) {
-            return new RenderOptions(precision, decimalMode, scientific, smallFractionsSizeLimit, matrixBrackets, charset);
+            return new RenderOptions(precision, decimalMode, scientific, smallFractionsSizeLimit, matrixBrackets, charset, autoParenthesis, outsidePrecedence, spaceMode);
         }
 
         public RenderOptions setScientific(boolean scientific) {
-            return new RenderOptions(precision, decimalMode, scientific, smallFractionsSizeLimit, matrixBrackets, charset);
+            return new RenderOptions(precision, decimalMode, scientific, smallFractionsSizeLimit, matrixBrackets, charset, autoParenthesis, outsidePrecedence, spaceMode);
         }
 
         public RenderOptions setSmallFractionsSizeLimit(int smallFractionsSizeLimit) {
-            return new RenderOptions(precision, decimalMode, scientific, smallFractionsSizeLimit, matrixBrackets, charset);
+            return new RenderOptions(precision, decimalMode, scientific, smallFractionsSizeLimit, matrixBrackets, charset, autoParenthesis, outsidePrecedence, spaceMode);
         }
 
         public RenderOptions setMatrixBrackets(Bracket matrixBrackets) {
-            return new RenderOptions(precision, decimalMode, scientific, smallFractionsSizeLimit, matrixBrackets, charset);
+            return new RenderOptions(precision, decimalMode, scientific, smallFractionsSizeLimit, matrixBrackets, charset, autoParenthesis, outsidePrecedence, spaceMode);
         }
 
         public RenderOptions setCharset(CharacterSet charset) {
-            return new RenderOptions(precision, decimalMode, scientific, smallFractionsSizeLimit, matrixBrackets, charset);
+            return new RenderOptions(precision, decimalMode, scientific, smallFractionsSizeLimit, matrixBrackets, charset, autoParenthesis, outsidePrecedence, spaceMode);
+        }
+
+        public RenderOptions setAutoParenthesis(boolean autoParenthesis) {
+            return new RenderOptions(precision, decimalMode, scientific, smallFractionsSizeLimit, matrixBrackets, charset, autoParenthesis, outsidePrecedence, spaceMode);
+        }
+
+        public RenderOptions setOutsidePrecedence(int outsidePrecedence) {
+            return new RenderOptions(precision, decimalMode, scientific, smallFractionsSizeLimit, matrixBrackets, charset, autoParenthesis, outsidePrecedence, spaceMode);
+        }
+
+        public RenderOptions setSpaceMode(SpaceMode spaceMode) {
+            return new RenderOptions(precision, decimalMode, scientific, smallFractionsSizeLimit, matrixBrackets, charset, autoParenthesis, outsidePrecedence, spaceMode);
         }
 
         public enum DecimalMode {
@@ -757,5 +802,28 @@ public interface RenderableExpression {
             DECIMAL_IF_POSSIBLE,
             SMART
         }
+
+        public enum SpaceMode {
+            /**
+             * Omit spaces where possible.
+             */
+            COMPACT,
+            /**
+             * Omit spaces if the operands are small, add spaces if the operands are bigger.
+             */
+            AUTO,
+            /**
+             * Always pad operators with spaces.
+             */
+            FORCE
+        }
     }
+
+
+//    static void main(String[] args) {
+//        RenderableExpression a = name("a"), b = name("b");
+////        RenderableExpression e = frac(plus(a,b), minus(a,b));
+//        RenderableExpression e = rowVec(num(2), a, b);
+//        Console.log(e.render(RenderMode.INLINE, RenderOptions.DEFAULT));
+//    }
 }
