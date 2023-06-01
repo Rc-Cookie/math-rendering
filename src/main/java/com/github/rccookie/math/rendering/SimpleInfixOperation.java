@@ -40,16 +40,16 @@ final class SimpleInfixOperation implements RenderableExpression {
     public AsciiArt renderAsciiArt(RenderOptions options) {
         AsciiArt a = this.a.render(ASCII_ART, leftOptions(options)), b = this.b.render(ASCII_ART, rightOptions(options)), symbol = this.symbol.render(ASCII_ART, options);
 
-        boolean spaces = (a.height() > 2 || b.height() > 2) && (symbol.height() != 1 || !hasPadding(symbol.toString()));
+        boolean spaces;
+        if(options.spaceMode == RenderOptions.SpaceMode.COMPACT || Utils.hasPadding(symbol.toString())) spaces = false;
+        else if(options.spaceMode == RenderOptions.SpaceMode.FORCE) spaces = true;
+        else spaces = a.height() != 1 || b.height() != 1 || (a.width() > 2 && b.width() > 2);
+
         AsciiArt art = a;
         if(spaces) art = art.appendTop(new AsciiArt(" "));
         art = art.appendCenter(symbol);
         if(spaces) art = art.appendTop(new AsciiArt(" "));
         return art.appendCenter(b);
-    }
-
-    private static boolean hasPadding(String s) {
-        return s.length() >= 3 && s.charAt(0) == ' ' && s.charAt(s.length()-1) == ' ';
     }
 
     @Override

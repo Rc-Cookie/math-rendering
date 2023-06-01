@@ -110,7 +110,7 @@ final class Rational implements RenderableExpression {
             expr = RenderableExpression.mult(s.factor, expr);
         if(s.negative)
             expr = RenderableExpression.neg(expr);
-        return expr.render(renderMode, options.setScientific(false));
+        return expr.render(renderMode, options.setScientific(false).setSpaceMode(options.spaceMode == RenderOptions.SpaceMode.FORCE ? RenderOptions.SpaceMode.FORCE : RenderOptions.SpaceMode.COMPACT));
     }
 
     private <T> T renderForceDecimal(RenderMode<T> renderMode, RenderOptions options) {

@@ -184,4 +184,10 @@ final class Utils {
         }
         return log;
     }
+
+    static boolean hasPadding(String s) {
+        if(s.contains("\n"))
+            return s.lines().allMatch(Utils::hasPadding);
+        return s.length() >= 3 && s.charAt(0) == ' ' && s.charAt(s.length()-1) == ' ';
+    }
 }

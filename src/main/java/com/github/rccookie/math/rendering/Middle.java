@@ -29,26 +29,29 @@ final class Middle implements RenderableExpression {
     @Override
     public String renderInline(RenderOptions options) {
         options = options.setOutsidePrecedence(precedence() + 1);
-        return a.render(INLINE, options) + " | " + b.render(INLINE, options);
+        String space = options.spaceMode == RenderOptions.SpaceMode.COMPACT ? "" : " ";
+        return a.render(INLINE, options) + space + "|" + space + b.render(INLINE, options);
     }
 
     @Override
     public AsciiArt renderAsciiArt(RenderOptions options) {
         options = options.setOutsidePrecedence(precedence() + 1);
 
-        String bar = options.charset.orFallback("|", "\u2502");
+        String space = options.spaceMode == RenderOptions.SpaceMode.COMPACT ? "" : " ";
+        String bar = space + options.charset.orFallback("|", "\u2502") + space;
         AsciiArt a = this.a.render(ASCII_ART, options), b = this.b.render(ASCII_ART, options);
 
         int height = Math.max(a.center(), b.center()), depth = Math.max(a.height()-a.center(), b.height()-b.center());
         int totalHeight = height + depth;
-        AsciiArt barArt = new AsciiArt(totalHeight, i -> i==totalHeight-1 ? " | " : " "+bar+" ").setCenter(height);
+        AsciiArt barArt = new AsciiArt(totalHeight, i -> i==totalHeight-1 ? space+"|"+space : bar).setCenter(height);
         return a.appendCenter(barArt).appendCenter(b);
     }
 
     @Override
     public String renderLatex(RenderOptions options) {
         options = options.setOutsidePrecedence(precedence() + 1);
-        return "\\left."+a.render(LATEX, options)+"\\;\\middle|\\;"+b.render(LATEX, options)+"\\right.";
+        String space = options.spaceMode == RenderOptions.SpaceMode.COMPACT ? "" : "\\;";
+        return "\\left."+a.render(LATEX, options)+space+"\\middle|"+space+b.render(LATEX, options)+"\\right.";
     }
 
     @Override

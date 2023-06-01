@@ -443,6 +443,10 @@ public interface RenderableExpression {
         return new List(delimiter, values);
     }
 
+    static RenderableExpression tuple(RenderableExpression... values) {
+        return par(list(values));
+    }
+
     // ---------------------------------------------------
 
     static RenderableExpression call(String fName, RenderableExpression... params) {
@@ -694,25 +698,63 @@ public interface RenderableExpression {
     }
 
 
-
+    /**
+     * Options to adjust the rendering result. The same option may have a different impact in different rendering modes,
+     * and some options may be ignored by some modes completely.
+     */
     final class RenderOptions {
 
-        public static RenderOptions DEFAULT = new RenderOptions(40, DecimalMode.SMART, true);
+        /**
+         * Default rendering options.
+         */
+        public static final RenderOptions DEFAULT = new RenderOptions(40, DecimalMode.SMART, true, 4, Bracket.SQUARE, CharacterSet.UNICODE, true, Precedence.MIN, SpaceMode.AUTO);
 
+        /**
+         * Maximum output precision of floating point numbers. Does not work if the number has
+         * been created by string.
+         */
         public final int precision;
+        /**
+         * Determines how non-integer numbers are displayed. Does not work if the number
+         * has been created by string
+         */
         public final DecimalMode decimalMode;
+        /**
+         * Whether to allow to display big or small numbers in scientific notation. Does not
+         * work if the number has been created by string.
+         */
         public final boolean scientific;
+        /**
+         * If both numerator and denominator have at most this many characters and don't need parenthesis,
+         * fractions will be displayed inline instead of as fraction. Ascii art rendering only.
+         */
         public final int smallFractionsSizeLimit;
+        /**
+         * The default bracket style to use for matrices and vectors, if not specified explicitly.
+         */
         public final Bracket matrixBrackets;
+        /**
+         * The allowed output charset. If unicode characters are unsupported, they will be displayed with
+         * ascii art instead. Ascii art and inline mode only.
+         */
         public final CharacterSet charset;
+        /**
+         * Whether to automatically add necessary parenthesis to keep the semantic meaning of the input,
+         * for example a*(b+c) instead of a*b+c, if the input was <code>mult(a,plus(b,c))</code>.
+         */
         public final boolean autoParenthesis;
+        /**
+         * The precedence of the operator that the rendered expression is an operand of.
+         */
         public final int outsidePrecedence;
+        /**
+         * Determines how many and how big spaces to use.
+         */
         public final SpaceMode spaceMode;
 
-        public RenderOptions(int precision, DecimalMode decimalMode, boolean scientific) {
-            this(precision, decimalMode, scientific, 4, Bracket.SQUARE, CharacterSet.UNICODE, true, Precedence.MIN, SpaceMode.AUTO);
-        }
-
+        /**
+         * Creates a new render options object.
+         */
         public RenderOptions(int precision, DecimalMode decimalMode, boolean scientific, int smallFractionsSizeLimit, Bracket matrixBrackets, CharacterSet charset, boolean autoParenthesis, int outsidePrecedence, SpaceMode spaceMode) {
             this.precision = Arguments.checkRange(precision, 1, null);
             this.decimalMode = Arguments.checkNull(decimalMode, "decimalMode");
@@ -796,20 +838,42 @@ public interface RenderableExpression {
             return new RenderOptions(precision, decimalMode, scientific, smallFractionsSizeLimit, matrixBrackets, charset, autoParenthesis, outsidePrecedence, spaceMode);
         }
 
+        /**
+         * Different output modes for non-integer numbers.
+         */
         public enum DecimalMode {
+            /**
+             * Force rendering as floating point number, even if that can only approximate it.
+             */
             FORCE_DECIMAL,
+            /**
+             * Force rendering as fraction. This will never lose precision, but the fraction may
+             * become very big.
+             */
             FORCE_FRACTION,
+            /**
+             * Render as floating point number, if the value can be represented in a finite number of
+             * decimal places. Otherwise, render as fraction.
+             */
             DECIMAL_IF_POSSIBLE,
+            /**
+             * Choose automatically an appropriate rendering mode, based on whether the number can be
+             * displayed as decimal, the size of the fraction and the precision of the input number.
+             */
             SMART
         }
 
+        /**
+         * Different modes for adding spaces.
+         */
         public enum SpaceMode {
             /**
              * Omit spaces where possible.
              */
             COMPACT,
             /**
-             * Omit spaces if the operands are small, add spaces if the operands are bigger.
+             * Omit spaces if the operands are visually small, add spaces if the operands are visually bigger,
+             * and generally where it "looks better".
              */
             AUTO,
             /**
@@ -823,7 +887,8 @@ public interface RenderableExpression {
 //    static void main(String[] args) {
 //        RenderableExpression a = name("a"), b = name("b");
 ////        RenderableExpression e = frac(plus(a,b), minus(a,b));
-//        RenderableExpression e = rowVec(num(2), a, b);
-//        Console.log(e.render(RenderMode.INLINE, RenderOptions.DEFAULT));
+////        RenderableExpression e = tuple(implicit(num(2),a),b,num(2));
+//        RenderableExpression e = num(123456.789);
+//        Console.log(e.render(RenderMode.ASCII_ART, RenderOptions.DEFAULT.setSpaceMode(RenderOptions.SpaceMode.AUTO) ));
 //    }
 }

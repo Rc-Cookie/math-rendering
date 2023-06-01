@@ -31,16 +31,23 @@ final class AugmentedGrid implements RenderableExpression {
     @Override
     public String renderInline(RenderOptions options) {
         options = options.setOutsidePrecedence(precedence());
+
+        String comma = options.spaceMode == RenderOptions.SpaceMode.COMPACT ? "," : ", ";
+        String bar = options.spaceMode == RenderOptions.SpaceMode.COMPACT ? "|" : " | ";
+        String space = options.spaceMode == RenderOptions.SpaceMode.COMPACT ? " " : "  ";
         StringBuilder str = new StringBuilder();
         for(int i=0; i<a.elements.length; i++) {
-            if(i != 0) str.append(",");
-            str.append("[");
-            for(RenderableExpression e : a.elements[i])
-                str.append(" ").append(e.render(INLINE, options)).append(" ");
-            str.append("|");
-            for(RenderableExpression e : b.elements[i])
-                str.append(" ").append(e.render(INLINE, options)).append(" ");
-            str.append("]");
+            if(i != 0) str.append(comma);
+
+            for(int j=0; j<a.elements[i].length; j++) {
+                if(j != 0) str.append(space);
+                str.append(a.elements[i][j].render(INLINE, options));
+            }
+            str.append(bar);
+            for(int j=0; j<a.elements[i].length; j++) {
+                if(j != 0) str.append(space);
+                str.append(a.elements[i][j].render(INLINE, options));
+            }
         }
         return str.toString();
     }
@@ -68,17 +75,23 @@ final class AugmentedGrid implements RenderableExpression {
 
         AsciiArt art = new AsciiArt("");
         AsciiArt bar = new AsciiArt(""+vert);
+        int spaces;
+        if(options.spaceMode == RenderOptions.SpaceMode.COMPACT) spaces = 1;
+        else if(options.spaceMode == RenderOptions.SpaceMode.FORCE) spaces = 2;
+        else spaces = elements.length != 1 ? 1 : 2;
+        int barSpace = options.spaceMode == RenderOptions.SpaceMode.COMPACT ? 0 : 1;
 
         for(int i=0, yOff=0; i<elements.length; yOff+=heights[i], i++) {
             int xOff = 0;
-            for(int j=0; j<aLen; xOff+=widths[j]+1, j++) {
+            for(int j=0; j<aLen; xOff+=widths[j]+spaces, j++) {
                 int w = widths[j], h = heights[i];
                 AsciiArt e = elements[i][j];
                 art = art.draw(e, new int2(xOff + (w - e.width() + 1) / 2, yOff + (h - e.height() + 1) / 2));
             }
+            xOff += barSpace - spaces;
             art = art.draw(i == elements.length-1 ? new AsciiArt("|") : bar, new int2(xOff, yOff));
-            xOff += 2;
-            for(int j=0; j<b.elements[i].length; xOff+=widths[j+aLen]+1, j++) {
+            xOff += barSpace + 1;
+            for(int j=0; j<b.elements[i].length; xOff+=widths[j+aLen]+spaces, j++) {
                 int w = widths[j+aLen], h = heights[i];
                 AsciiArt e = elements[i][j+aLen];
                 art = art.draw(e, new int2(xOff + (w - e.width() + 1) / 2, yOff + (h - e.height() + 1) / 2));

@@ -41,11 +41,12 @@ final class Grid implements RenderableExpression {
         options = options.setOutsidePrecedence(Precedence.MIN);
 
         String comma = options.spaceMode == RenderOptions.SpaceMode.COMPACT ? "," : ", ";
+        String space = options.spaceMode == RenderOptions.SpaceMode.COMPACT ? " " : "  ";
         StringBuilder str = new StringBuilder();
         for(int i=0; i<elements.length; i++) {
             if(i != 0) str.append(comma);
             for(int j=0; j<elements[i].length; j++) {
-                if(j != 0) str.append("  ");
+                if(j != 0) str.append(space);
                 str.append(elements[i][j].render(INLINE, options));
             }
         }
@@ -64,9 +65,11 @@ final class Grid implements RenderableExpression {
             heights[i] = Math.max(heights[i], elements[i][j].height());
         }
 
+        int spaces = options.spaceMode == RenderOptions.SpaceMode.COMPACT ? 1 : 2;
+
         AsciiArt art = new AsciiArt("");
         for(int i=0, yOff=0; i<elements.length; yOff+=heights[i], i++) {
-            for(int j=0, xOff=0; j<elements[i].length; xOff+=widths[j]+2, j++) {
+            for(int j=0, xOff=0; j<elements[i].length; xOff+=widths[j]+spaces, j++) {
                 art = art.draw(elements[i][j], new int2(xOff + (widths[j]-elements[i][j].width()+1)/2, yOff + (heights[i]-elements[i][j].height()+1)/2));
             }
         }

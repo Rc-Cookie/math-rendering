@@ -63,7 +63,9 @@ final class BigSymbol implements RenderableExpression {
             AsciiArt sup = this.sup.render(ASCII_ART, options.setOutsidePrecedence(Precedence.MIN));
             art = art.draw(sup, new int2((symbol.width() - sup.width() + 1) / 2, -sup.height()));
         }
-        return art.appendTop(new AsciiArt(" ")).appendCenter(this.value.render(ASCII_ART, options));
+        if(options.spaceMode != RenderOptions.SpaceMode.COMPACT)
+            art = art.appendTop(new AsciiArt(" "));
+        return art.appendCenter(this.value.render(ASCII_ART, options));
     }
 
     @Override

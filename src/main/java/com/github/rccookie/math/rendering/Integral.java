@@ -44,8 +44,8 @@ final class Integral implements RenderableExpression {
         AsciiArt value = this.value.renderAsciiArt(options);
         AsciiArt symbol;
         if(options.charset.canDisplay("\u222B\u2320\u23AE\u2321"))
-            symbol = createSymbol(value.height(), 1, "\u222B", "\u2320", "\u23AE", "\u2321");
-        else symbol = createSymbol(value.height(), 3, null, "/", "|", "/");
+            symbol = createSymbol(value.height(), 1, "\u222B", "\u2320", "\u23AE", "\u2321", options);
+        else symbol = createSymbol(value.height(), 3, null, "/", "|", "/", options);
 
         AsciiArt art = symbol;
         if(this.a != null) {
@@ -59,10 +59,11 @@ final class Integral implements RenderableExpression {
         return art.appendCenter(value);
     }
 
-    private static AsciiArt createSymbol(int height, int minHeight, String inline, String top, String middle, String bottom) {
+    private static AsciiArt createSymbol(int height, int minHeight, String inline, String top, String middle, String bottom, RenderOptions options) {
         int h = Math.max(height, minHeight);
         if(h <= 1) return new AsciiArt(inline);
-        return new AsciiArt(h, i -> (i == 0 ? top : i == (h-1) ? bottom : middle) + " ");
+        String space = options.spaceMode == RenderOptions.SpaceMode.COMPACT ? "" : " ";
+        return new AsciiArt(h, i -> (i == 0 ? top : i == (h-1) ? bottom : middle) + space);
     }
 
     @Override

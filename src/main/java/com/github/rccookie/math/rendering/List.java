@@ -44,11 +44,14 @@ final class List implements RenderableExpression {
         if(this.elements.length == 1) return elements[0].render(ASCII_ART, options);
 
         AsciiArt delimiter = this.delimiter.render(ASCII_ART, options);
-        options = options.setOutsidePrecedence(precedence() + 1);
+        AsciiArt[] elements = Arrays.stream(this.elements).map(e -> e.render(ASCII_ART, options.setOutsidePrecedence(precedence() + 1))).toArray(AsciiArt[]::new);
+        if(!Utils.hasPadding(delimiter.toString()) && (options.spaceMode == RenderOptions.SpaceMode.FORCE ||
+                (options.spaceMode == RenderOptions.SpaceMode.AUTO && Arrays.stream(elements).anyMatch(e -> e.size().area() != 1))))
+            delimiter = delimiter.appendCenter(new AsciiArt(" "));
 
-        AsciiArt art = elements[0].render(ASCII_ART, options);
+        AsciiArt art = elements[0];
         for(int i=1; i<elements.length; i++)
-            art = art.appendCenter(delimiter).appendCenter(elements[i].render(ASCII_ART, options));
+            art = art.appendCenter(delimiter).appendCenter(elements[i]);
         return art;
     }
 
