@@ -12,13 +12,15 @@ final class SimpleInfixOperation implements RenderableExpression {
     final RenderableExpression symbol;
     final int precedence;
     final boolean associative;
+    final OperatorAlignment alignment;
 
-    SimpleInfixOperation(RenderableExpression a, RenderableExpression b, RenderableExpression symbol, int precedence, boolean associative) {
+    SimpleInfixOperation(RenderableExpression a, RenderableExpression b, RenderableExpression symbol, int precedence, boolean associative, OperatorAlignment alignment) {
         this.a = Arguments.checkNull(a, "a");
         this.b = Arguments.checkNull(b, "b");
         this.symbol = Arguments.checkNull(symbol, "symbol");
         this.precedence = precedence;
         this.associative = associative;
+        this.alignment = Arguments.checkNull(alignment, "alignment");
     }
 
     @Override
@@ -43,11 +45,13 @@ final class SimpleInfixOperation implements RenderableExpression {
         boolean spaces;
         if(options.spaceMode == RenderOptions.SpaceMode.COMPACT || Utils.hasPadding(symbol.toString())) spaces = false;
         else if(options.spaceMode == RenderOptions.SpaceMode.FORCE) spaces = true;
-        else spaces = a.height() != 1 || b.height() != 1 || (a.width() > 2 && b.width() > 2);
+        else if(a.height() != 1 || b.height() != 1 || (a.width() > 2 && b.width() > 2)) spaces = true;
+        else if(a.width() <= 2 && b.width() <= 2) spaces = false;
+        else spaces = (a.width() != 1 && b.width() != 1) || a.toString().contains(" ") || b.toString().contains(" ");
 
         AsciiArt art = a;
         if(spaces) art = art.appendTop(new AsciiArt(" "));
-        art = art.appendCenter(symbol);
+        art = art.append(symbol, alignment, true);
         if(spaces) art = art.appendTop(new AsciiArt(" "));
         return art.appendCenter(b);
     }

@@ -10,11 +10,13 @@ class SimplePrefixOperation implements RenderableExpression {
     final RenderableExpression value;
     final RenderableExpression symbol;
     final int precedence;
+    final OperatorAlignment alignment;
 
-    SimplePrefixOperation(RenderableExpression value, RenderableExpression symbol, int precedence) {
+    SimplePrefixOperation(RenderableExpression value, RenderableExpression symbol, int precedence, OperatorAlignment alignment) {
         this.value = Arguments.checkNull(value, "value");
         this.symbol = Arguments.checkNull(symbol, "symbol");
         this.precedence = precedence;
+        this.alignment = Arguments.checkNull(alignment, "alignment");
     }
 
     @Override
@@ -34,7 +36,8 @@ class SimplePrefixOperation implements RenderableExpression {
 
     @Override
     public AsciiArt renderAsciiArt(RenderOptions options) {
-        return symbol.render(ASCII_ART, options).appendCenter(value.render(ASCII_ART, options.setOutsidePrecedence(Math.min(precedence, Integer.MAX_VALUE-1) + 1)));
+        return symbol.render(ASCII_ART, options)
+                .append(value.render(ASCII_ART, options.setOutsidePrecedence(Math.min(precedence, Integer.MAX_VALUE-1) + 1)), alignment, false);
     }
 
     @Override

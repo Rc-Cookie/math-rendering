@@ -10,11 +10,13 @@ final class SimplePostfixOperation implements RenderableExpression {
     final RenderableExpression value;
     final RenderableExpression symbol;
     final int precedence;
+    final OperatorAlignment alignment;
 
-    SimplePostfixOperation(RenderableExpression value, RenderableExpression symbol, int precedence) {
+    SimplePostfixOperation(RenderableExpression value, RenderableExpression symbol, int precedence, OperatorAlignment alignment) {
         this.value = Arguments.checkNull(value, "value");
         this.symbol = symbol;
         this.precedence = precedence;
+        this.alignment = Arguments.checkNull(alignment, "alignment");
     }
 
     @Override
@@ -34,7 +36,9 @@ final class SimplePostfixOperation implements RenderableExpression {
 
     @Override
     public AsciiArt renderAsciiArt(RenderOptions options) {
-        return value.render(ASCII_ART, options.setOutsidePrecedence(Math.min(precedence, Integer.MAX_VALUE-1) + 1)).appendCenter(symbol.render(ASCII_ART, options));
+        AsciiArt value = this.value.render(ASCII_ART, options.setOutsidePrecedence(Math.min(precedence, Integer.MAX_VALUE-1) + 1)),
+                symbol = this.symbol.render(ASCII_ART, options);
+        return value.append(symbol, alignment, true);
     }
 
     @Override

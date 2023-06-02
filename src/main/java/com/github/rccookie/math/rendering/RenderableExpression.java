@@ -574,7 +574,11 @@ public interface RenderableExpression {
     }
 
     static RenderableExpression infix(RenderableExpression symbol, RenderableExpression a, RenderableExpression b, int precedence, boolean associative) {
-        return new SimpleInfixOperation(a, b, symbol, precedence, associative);
+        return infix(symbol, a, b, precedence, associative, OperatorAlignment.CENTER);
+    }
+
+    static RenderableExpression infix(RenderableExpression symbol, RenderableExpression a, RenderableExpression b, int precedence, boolean associative, OperatorAlignment alignment) {
+        return new SimpleInfixOperation(a, b, symbol, precedence, associative, alignment);
     }
 
     static RenderableExpression infix(String symbol, RenderableExpression a, RenderableExpression b, int precedence, boolean associative) {
@@ -592,7 +596,11 @@ public interface RenderableExpression {
     }
 
     static RenderableExpression prefix(RenderableExpression symbol, RenderableExpression value, int precedence) {
-        return new SimplePrefixOperation(value, symbol, precedence);
+        return prefix(symbol, value, precedence, OperatorAlignment.CENTER);
+    }
+
+    static RenderableExpression prefix(RenderableExpression symbol, RenderableExpression value, int precedence, OperatorAlignment alignment) {
+        return new SimplePrefixOperation(value, symbol, precedence, alignment);
     }
 
     static RenderableExpression prefix(String symbol, RenderableExpression value, int precedence) {
@@ -606,15 +614,23 @@ public interface RenderableExpression {
     }
 
     static RenderableExpression percent(RenderableExpression value) {
-        return new SimplePostfixOperation(percent(), value, Precedence.PERCENT);
+        return postfix(percent(), value, Precedence.PERCENT);
     }
 
     static RenderableExpression deg(RenderableExpression value) {
-        return new SimplePostfixOperation(deg(), value, Precedence.DEGREE);
+        return postfix(deg(), value, Precedence.DEGREE);
+    }
+
+    static RenderableExpression transp(RenderableExpression value) {
+        return new Transposition(value);
     }
 
     static RenderableExpression postfix(RenderableExpression symbol, RenderableExpression value, int precedence) {
-        return new SimplePostfixOperation(value, symbol, precedence);
+        return postfix(symbol, value, precedence, OperatorAlignment.CENTER);
+    }
+
+    static RenderableExpression postfix(RenderableExpression symbol, RenderableExpression value, int precedence, OperatorAlignment alignment) {
+        return new SimplePostfixOperation(value, symbol, precedence, alignment);
     }
 
     static RenderableExpression postfix(String symbol, RenderableExpression value, int precedence) {
@@ -707,7 +723,7 @@ public interface RenderableExpression {
         /**
          * Default rendering options.
          */
-        public static final RenderOptions DEFAULT = new RenderOptions(40, DecimalMode.SMART, true, 4, Bracket.SQUARE, CharacterSet.UNICODE, true, Precedence.MIN, SpaceMode.AUTO);
+        public static final RenderOptions DEFAULT = new RenderOptions(40, DecimalMode.SMART, true, 4, Bracket.SQUARE, CharacterSet.UNICODE, true, Precedence.MIN, SpaceMode.AUTO, TranspositionStyle.UPPER_T);
 
         /**
          * Maximum output precision of floating point numbers. Does not work if the number has
@@ -751,11 +767,15 @@ public interface RenderableExpression {
          * Determines how many and how big spaces to use.
          */
         public final SpaceMode spaceMode;
+        /**
+         * Determines how to render the matrix transposition operator.
+         */
+        public final TranspositionStyle transpositionStyle;
 
         /**
          * Creates a new render options object.
          */
-        public RenderOptions(int precision, DecimalMode decimalMode, boolean scientific, int smallFractionsSizeLimit, Bracket matrixBrackets, CharacterSet charset, boolean autoParenthesis, int outsidePrecedence, SpaceMode spaceMode) {
+        public RenderOptions(int precision, DecimalMode decimalMode, boolean scientific, int smallFractionsSizeLimit, Bracket matrixBrackets, CharacterSet charset, boolean autoParenthesis, int outsidePrecedence, SpaceMode spaceMode, TranspositionStyle transpositionStyle) {
             this.precision = Arguments.checkRange(precision, 1, null);
             this.decimalMode = Arguments.checkNull(decimalMode, "decimalMode");
             this.scientific = scientific;
@@ -765,6 +785,7 @@ public interface RenderableExpression {
             this.autoParenthesis = autoParenthesis;
             this.outsidePrecedence = outsidePrecedence;
             this.spaceMode = Arguments.checkNull(spaceMode, "spaceMode");
+            this.transpositionStyle = Arguments.checkNull(transpositionStyle, "transpositionStyle");
         }
 
         @Override
@@ -779,6 +800,7 @@ public interface RenderableExpression {
                     ", autoParenthesis=" + autoParenthesis +
                     ", outsidePrecedence=" + outsidePrecedence +
                     ", spaceMode=" + spaceMode +
+                    ", transpositionStyle=" + transpositionStyle +
                     '}';
         }
 
@@ -794,48 +816,53 @@ public interface RenderableExpression {
                     && matrixBrackets == that.matrixBrackets
                     && autoParenthesis == that.autoParenthesis
                     && outsidePrecedence == that.outsidePrecedence
-                    && spaceMode == that.spaceMode;
+                    && spaceMode == that.spaceMode
+                    && transpositionStyle == that.transpositionStyle;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(precision, decimalMode, scientific, smallFractionsSizeLimit, matrixBrackets, autoParenthesis, outsidePrecedence, spaceMode);
+            return Objects.hash(precision, decimalMode, scientific, smallFractionsSizeLimit, matrixBrackets, autoParenthesis, outsidePrecedence, spaceMode, transpositionStyle);
         }
 
         public RenderOptions setPrecision(int precision) {
-            return new RenderOptions(precision, decimalMode, scientific, smallFractionsSizeLimit, matrixBrackets, charset, autoParenthesis, outsidePrecedence, spaceMode);
+            return new RenderOptions(precision, decimalMode, scientific, smallFractionsSizeLimit, matrixBrackets, charset, autoParenthesis, outsidePrecedence, spaceMode, transpositionStyle);
         }
 
         public RenderOptions setDecimalMode(DecimalMode decimalMode) {
-            return new RenderOptions(precision, decimalMode, scientific, smallFractionsSizeLimit, matrixBrackets, charset, autoParenthesis, outsidePrecedence, spaceMode);
+            return new RenderOptions(precision, decimalMode, scientific, smallFractionsSizeLimit, matrixBrackets, charset, autoParenthesis, outsidePrecedence, spaceMode, transpositionStyle);
         }
 
         public RenderOptions setScientific(boolean scientific) {
-            return new RenderOptions(precision, decimalMode, scientific, smallFractionsSizeLimit, matrixBrackets, charset, autoParenthesis, outsidePrecedence, spaceMode);
+            return new RenderOptions(precision, decimalMode, scientific, smallFractionsSizeLimit, matrixBrackets, charset, autoParenthesis, outsidePrecedence, spaceMode, transpositionStyle);
         }
 
         public RenderOptions setSmallFractionsSizeLimit(int smallFractionsSizeLimit) {
-            return new RenderOptions(precision, decimalMode, scientific, smallFractionsSizeLimit, matrixBrackets, charset, autoParenthesis, outsidePrecedence, spaceMode);
+            return new RenderOptions(precision, decimalMode, scientific, smallFractionsSizeLimit, matrixBrackets, charset, autoParenthesis, outsidePrecedence, spaceMode, transpositionStyle);
         }
 
         public RenderOptions setMatrixBrackets(Bracket matrixBrackets) {
-            return new RenderOptions(precision, decimalMode, scientific, smallFractionsSizeLimit, matrixBrackets, charset, autoParenthesis, outsidePrecedence, spaceMode);
+            return new RenderOptions(precision, decimalMode, scientific, smallFractionsSizeLimit, matrixBrackets, charset, autoParenthesis, outsidePrecedence, spaceMode, transpositionStyle);
         }
 
         public RenderOptions setCharset(CharacterSet charset) {
-            return new RenderOptions(precision, decimalMode, scientific, smallFractionsSizeLimit, matrixBrackets, charset, autoParenthesis, outsidePrecedence, spaceMode);
+            return new RenderOptions(precision, decimalMode, scientific, smallFractionsSizeLimit, matrixBrackets, charset, autoParenthesis, outsidePrecedence, spaceMode, transpositionStyle);
         }
 
         public RenderOptions setAutoParenthesis(boolean autoParenthesis) {
-            return new RenderOptions(precision, decimalMode, scientific, smallFractionsSizeLimit, matrixBrackets, charset, autoParenthesis, outsidePrecedence, spaceMode);
+            return new RenderOptions(precision, decimalMode, scientific, smallFractionsSizeLimit, matrixBrackets, charset, autoParenthesis, outsidePrecedence, spaceMode, transpositionStyle);
         }
 
         public RenderOptions setOutsidePrecedence(int outsidePrecedence) {
-            return new RenderOptions(precision, decimalMode, scientific, smallFractionsSizeLimit, matrixBrackets, charset, autoParenthesis, outsidePrecedence, spaceMode);
+            return new RenderOptions(precision, decimalMode, scientific, smallFractionsSizeLimit, matrixBrackets, charset, autoParenthesis, outsidePrecedence, spaceMode, transpositionStyle);
         }
 
         public RenderOptions setSpaceMode(SpaceMode spaceMode) {
-            return new RenderOptions(precision, decimalMode, scientific, smallFractionsSizeLimit, matrixBrackets, charset, autoParenthesis, outsidePrecedence, spaceMode);
+            return new RenderOptions(precision, decimalMode, scientific, smallFractionsSizeLimit, matrixBrackets, charset, autoParenthesis, outsidePrecedence, spaceMode, transpositionStyle);
+        }
+
+        public RenderOptions setTranspositionStyle(TranspositionStyle transpositionStyle) {
+            return new RenderOptions(precision, decimalMode, scientific, smallFractionsSizeLimit, matrixBrackets, charset, autoParenthesis, outsidePrecedence, spaceMode, transpositionStyle);
         }
 
         /**
@@ -881,6 +908,30 @@ public interface RenderableExpression {
              */
             FORCE
         }
+
+        public enum TranspositionStyle {
+            APOSTROPH,
+            LOWER_T,
+            UPPER_T
+        }
+    }
+
+    /**
+     * Determines how the operator aligns with its operand(s).
+     */
+    enum OperatorAlignment {
+        /**
+         * Align with the top of the operand(s).
+         */
+        TOP,
+        /**
+         * Align with the (logical) center of the operand(s).
+         */
+        CENTER,
+        /**
+         * Align with the baseline of the operand(s).
+         */
+        BOTTOM
     }
 
 
@@ -888,7 +939,7 @@ public interface RenderableExpression {
 //        RenderableExpression a = name("a"), b = name("b");
 ////        RenderableExpression e = frac(plus(a,b), minus(a,b));
 ////        RenderableExpression e = tuple(implicit(num(2),a),b,num(2));
-//        RenderableExpression e = num(123456.789);
-//        Console.log(e.render(RenderMode.ASCII_ART, RenderOptions.DEFAULT.setSpaceMode(RenderOptions.SpaceMode.AUTO) ));
+//        RenderableExpression e = transp(matrix(2, 2, a,b,b,a));
+//        Console.log(e.render(RenderMode.ASCII_ART, RenderOptions.DEFAULT ));
 //    }
 }

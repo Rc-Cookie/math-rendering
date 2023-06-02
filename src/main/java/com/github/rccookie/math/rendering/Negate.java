@@ -4,6 +4,6 @@ import com.github.rccookie.math.Precedence;
 
 final class Negate extends SimplePrefixOperation {
     Negate(RenderableExpression value) {
-        super(value, SpecialLiteral.NEGATE, Precedence.NEGATE);
+        super(value, SpecialLiteral.NEGATE, Precedence.NEGATE, OperatorAlignment.CENTER);
     }
 }

@@ -52,6 +52,7 @@ final class SpecialLiteral implements RenderableExpression {
     public static final RenderableExpression FACTORIAL = new Literal(true, "!");
     public static final RenderableExpression PERCENT = new SpecialLiteral(true, "%", "%", "%", "\\%");
     public static final RenderableExpression DEGREE = new SpecialLiteral(true, "°", "°", "°", "^\\circ");
+    public static final RenderableExpression TRANSPOSITION_APOSTROPH = new SpecialLiteral(true, "'", "'", "'", "'");
 
     public static final RenderableExpression LEFT_ARROW = new SpecialLiteral(true, "<-", "<-", "\u2190", "\\leftarrow");
     public static final RenderableExpression D_LEFT_ARROW = new SpecialLiteral(true, "<==", "<==", "\u21D0", "\\Leftarrow");

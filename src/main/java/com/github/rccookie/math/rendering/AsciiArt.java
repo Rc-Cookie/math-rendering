@@ -120,6 +120,16 @@ public final class AsciiArt {
     }
 
     @Contract(pure = true)
+    public AsciiArt append(AsciiArt a, RenderableExpression.OperatorAlignment alignment, boolean keepCenter) {
+        switch(Arguments.checkNull(alignment, "alignment")) {
+            case TOP: return appendTop(a, keepCenter);
+            case CENTER: return appendCenter(a);
+            case BOTTOM: return appendBottom(a, keepCenter);
+            default: throw new AssertionError();
+        }
+    }
+
+    @Contract(pure = true)
     public AsciiArt draw(AsciiArt a, int2 position) {
         return draw(a, position, true);
     }

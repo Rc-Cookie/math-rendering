@@ -34,6 +34,7 @@ public final class Precedence {
     public static final int SQUARE = POWER;
     public static final int CUBE = POWER;
     public static final int ROOT = MAX;
+    public static final int TRANSPOSITION = POWER;
 
     public static final int DEFINE = 0;
     public static final int LAMBDA = 10;
